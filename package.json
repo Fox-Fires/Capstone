@@ -1,0 +1,19 @@
+{
+  "name": "capstone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fox-Fires/Capstone.git"
+  },
+  "author": "Fox_Fires",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fox-Fires/Capstone/issues"
+  },
+  "homepage": "https://github.com/Fox-Fires/Capstone#readme"
+}
