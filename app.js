@@ -1,15 +1,24 @@
-const { Children } = require("react");
+const {
+  APIKey,
+  AuthDomain,
+  DBURL,
+  PorID,
+  STORAGE_BUCKET,
+  MESS_SEND_ID,
+  APP_ID,
+  MEAS_ID,
+} = require("./secrets");
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
-  apiKey: "AIzaSyC9CS5RnuZBn_aTD0uayQoDXwZDyM_nXuU",
-  authDomain: "capstonegolf-67769.firebaseapp.com",
-  databaseURL: "https://capstonegolf-67769.firebaseio.com",
-  projectId: "capstonegolf-67769",
-  storageBucket: "capstonegolf-67769.appspot.com",
-  messagingSenderId: "459683519058",
-  appId: "1:459683519058:web:f8c93b8cfb98b971e4dd8b",
-  measurementId: "G-2H80DTSPCY",
+  apiKey: APIKey,
+  authDomain: AuthDomain,
+  databaseURL: DBURL,
+  projectId: PorID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESS_SEND_ID,
+  appId: APP_ID,
+  measurementId: MEAS_ID,
 };
 
 // Initialize Firebase
