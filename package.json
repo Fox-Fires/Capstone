@@ -32,8 +32,11 @@
   "dependencies": {
     "express": "^4.17.1",
     "morgan": "^1.10.0",
+    "pixi.js": "^5.3.3",
+    "planck-js": "^0.3.21",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-pixi-fiber": "^0.14.1",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
