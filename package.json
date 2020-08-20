@@ -32,6 +32,8 @@
   "dependencies": {
     "express": "^4.17.1",
     "morgan": "^1.10.0",
+    "phaser": "^3.24.1",
+    "planck-js": "^0.3.21",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "socket.io": "^2.3.0"
