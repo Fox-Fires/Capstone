@@ -1,13 +1,17 @@
 import React from 'react'
 import UserForm  from './User-form'
+import PlayGame from './PlayGame'
 
 export default class Root extends React.Component{
   constructor(){
     super()
     this.state = {
       name: "",
+      playing: false
     }
     this.handleChange = this.handleChange.bind(this);
+    this.handlePlay = this.handlePlay.bind(this);
+    this.handleQuit = this.handleQuit.bind(this);
   }
 
   componentDidMount(){
@@ -30,15 +34,36 @@ export default class Root extends React.Component{
     })
   }
 
+  handlePlay(){
+    this.setState({
+      playing:true
+    })
+  }
+
+  handleQuit(){
+    this.setState({
+      playing:false
+    })
+  }
+
   render(){
-    console.log(this.state);
     return (
-      <div className="view">
+      <div>
         <h1>Tentative Golf Title</h1>
-        <UserForm
-          {...this.state}
-          handleChange = {this.handleChange}
-        />
+        {
+          this.state.playing !== true?
+          <UserForm
+            {...this.state}
+            handleChange = {this.handleChange}
+            handlePlay = {this.handlePlay}
+          />
+          :
+          <div>
+            <PlayGame
+              handleQuit = {this.handleQuit}
+            />
+          </div>
+        }
       </div>
     )
   }

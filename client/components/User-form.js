@@ -10,7 +10,7 @@ const UserForm = props => {
         value = {props.name}
         onChange = {props.handleChange}
       />
-      <button>Play</button>
+      <button onClick={props.handlePlay}>Play</button>
     </div>
   )
 }
