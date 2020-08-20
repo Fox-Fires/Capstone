@@ -22,3 +22,4 @@ var firebaseConfig = {
 };
 
 // Initialize Firebase
+export default firebaseConfig;
