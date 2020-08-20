@@ -1,22 +1,22 @@
-const path = require('path');
-const express = require('express');
-const morgan = require('morgan');
+const path = require("path");
+const express = require("express");
+const morgan = require("morgan");
 const PORT = process.env.PORT || 1337;
 const app = express();
-const socketio = require('socket.io');
+const socketio = require("socket.io");
 module.exports = app;
 
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
 // body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use((req, res, next) => {
   if (path.extname(req.path).length) {
-    const err = new Error('Not found');
+    const err = new Error("Not found");
     err.status = 404;
     next(err);
   } else {
@@ -25,19 +25,19 @@ app.use((req, res, next) => {
 });
 
 // sends index.html
-app.use('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public/index.html'));
+app.use("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public/index.html"));
 });
 
 // error handling endware
 app.use((err, req, res, next) => {
   console.error(err);
   console.error(err.stack);
-  res.status(err.status || 500).send(err.message || 'Internal server error.');
+  res.status(err.status || 500).send(err.message || "Internal server error.");
 });
 
 const server = app.listen(PORT, () =>
-  console.log(`Teeing off on port ${PORT}`)
+  console.log(`⛳️Teeing off on port ${PORT} ⛳️`)
 );
 
 // set up our socket control center
