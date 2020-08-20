@@ -1,5 +1,4 @@
 // const db = firebase.database()
-firebase.initilizeApp(firebaseConfig);
 
 const preObject = document.getElementById("object");
 
