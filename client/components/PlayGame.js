@@ -1,6 +1,6 @@
 import React from "react";
-import Phaser from 'phaser';
-
+import Phaser from "phaser";
+import Game from "../gameScenes/game";
 
 export default class PlayGame extends React.Component {
   componentDidMount() {
@@ -10,20 +10,21 @@ export default class PlayGame extends React.Component {
       width: 800,
       height: 600,
       parent: "game-view",
-      'dom.createContainer':true,
-      backgroundColor: '#cccccc'
+      "dom.createContainer": true,
+      backgroundColor: "#cccccc",
+      scene: [Game],
     };
-    const game = new Phaser.Game(config)
+    const game = new Phaser.Game(config);
   }
-  componentWillUnmount(){
+  componentWillUnmount() {
     //Temporary method for removing the game
     document.getElementById("game-view").innerHTML = "";
   }
   render() {
-    const {handleQuit} = this.props
+    const { handleQuit } = this.props;
     return (
       <div>
-        <button onClick = {handleQuit} >Leave Game</button>
+        <button onClick={handleQuit}>Leave Game</button>
       </div>
     );
   }
