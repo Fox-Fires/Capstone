@@ -6,7 +6,7 @@ export default class Game extends Phaser.Scene {
       key: "Game",
     });
     this.destroy = this.destroy.bind(this);
-    this.me=null;
+    this.me = null;
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -17,7 +17,7 @@ export default class Game extends Phaser.Scene {
     this.worldScale = 30;
 
     // world gravity, as a Vec2 object. It's just a x, y vector
-    let gravity = planck.Vec2(0,1);
+    let gravity = planck.Vec2(0, 1);
     // this is how we create a Box2D world
     this.world = planck.World({});
 
@@ -68,12 +68,23 @@ export default class Game extends Phaser.Scene {
     // createBox is a method I wrote to create a box, see how it works at line 55
     const floorSensor = this.createBox(800 / 2, 600 - 20, 800, 40, false, true);
     const floor = this.createBox(800 / 2, 600 - 20, 800, 40, false, false);
+    const wallTop = this.createBox(800 / 2, 20, 800, 40,false,false)
+    const wallLeft = this.createBox(20,600/2,40,600,false,false)
+    const wallRight = this.createBox(800-20,600/2,40,600,false,false)
     // const ball2 = this.createBall(400, 100, 15);
     const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
-    const ball1 = this.createBall(200, 10, 15);
+    const ball1 = this.createBall(200, 60, 15);
     const ball3 = this.createBall(600, 190, 15);
     this.me = ball3;
+
+    // Testing Movements
+    this.inputKeys = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+    });
   }
   createBall(posX, posY, radius) {
     const ballFixDef = {
@@ -157,14 +168,6 @@ export default class Game extends Phaser.Scene {
 
     // a body can have anything in its user data, normally it's used to store its sprite
     box.setUserData(userData);
-    // Testing Movements
-    this.inputKeys = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D,
-    })
-
   }
 
   update() {
@@ -190,17 +193,17 @@ export default class Game extends Phaser.Scene {
       userData.y = bodyPosition.y * this.worldScale;
       userData.rotation = bodyAngle;
     }
-    if(this.inputKeys.up.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(0,-60),true)
+    if (this.inputKeys.up.isDown) {
+      this.me.applyForceToCenter(planck.Vec2(0, -60), true);
     }
-    if(this.inputKeys.left.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(-30,0),true)
+    if (this.inputKeys.left.isDown) {
+      this.me.applyForceToCenter(planck.Vec2(-30, 0), true);
     }
-    if(this.inputKeys.right.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(30,0),true)
+    if (this.inputKeys.right.isDown) {
+      this.me.applyForceToCenter(planck.Vec2(30, 0), true);
     }
-    if(this.inputKeys.down.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(0,30),true)
+    if (this.inputKeys.down.isDown) {
+      this.me.applyForceToCenter(planck.Vec2(0, 30), true);
     }
   }
 }
