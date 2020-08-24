@@ -18,9 +18,8 @@ export default class Game extends Phaser.Scene {
 
     // world gravity, as a Vec2 object. It's just a x, y vector
     let gravity = planck.Vec2(0,1);
-
     // this is how we create a Box2D world
-    this.world = planck.World(gravity);
+    this.world = planck.World({});
 
     const ballFixDef = {
       friction: 0.1,
@@ -84,7 +83,7 @@ export default class Game extends Phaser.Scene {
       userData: "ball",
     };
     const ballBodyDef = {
-      linearDamping: 0.15,
+      linearDamping: 1.5,
       angularDamping: 1,
     };
 
@@ -192,20 +191,16 @@ export default class Game extends Phaser.Scene {
       userData.rotation = bodyAngle;
     }
     if(this.inputKeys.up.isDown) {
-      console.log("pressed W",this.me);
-      this.me.applyForceToCenter(planck.Vec2(0,-60))
+      this.me.applyForceToCenter(planck.Vec2(0,-60),true)
     }
     if(this.inputKeys.left.isDown) {
-      console.log("pressed A",this.me);
-      this.me.applyForceToCenter(planck.Vec2(-30,0))
+      this.me.applyForceToCenter(planck.Vec2(-30,0),true)
     }
     if(this.inputKeys.right.isDown) {
-      console.log("pressed D",this.me);
-      this.me.applyForceToCenter(planck.Vec2(30,0))
+      this.me.applyForceToCenter(planck.Vec2(30,0),true)
     }
     if(this.inputKeys.down.isDown) {
-      console.log("pressed S",this.me);
-      this.me.applyForceToCenter(planck.Vec2(0,30))
+      this.me.applyForceToCenter(planck.Vec2(0,30),true)
     }
   }
 }
