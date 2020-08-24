@@ -6,6 +6,7 @@ export default class Game extends Phaser.Scene {
       key: "Game",
     });
     this.destroy = this.destroy.bind(this);
+    this.me=null;
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -16,7 +17,7 @@ export default class Game extends Phaser.Scene {
     this.worldScale = 30;
 
     // world gravity, as a Vec2 object. It's just a x, y vector
-    let gravity = planck.Vec2(0, 30);
+    let gravity = planck.Vec2(0,1);
 
     // this is how we create a Box2D world
     this.world = planck.World(gravity);
@@ -49,12 +50,12 @@ export default class Game extends Phaser.Scene {
         (fixtureA.getUserData() === ballFixDef.userData &&
           fixtureA.getBody()) ||
         (fixtureB.getUserData() === ballFixDef.userData && fixtureB.getBody());
-      console.log("ball, rail", ball, rail);
+      // console.log("ball, rail", ball, rail);
       setTimeout(function () {
         if (ball && rail) {
-          console.log(this.world);
-          destroy(ball);
-          console.log("destroy");
+          // console.log(this.world);
+          // destroy(ball);
+          // console.log("destroy");
         }
       }, 1);
 
@@ -72,7 +73,8 @@ export default class Game extends Phaser.Scene {
     const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
     const ball1 = this.createBall(200, 10, 15);
-    // const ball3 = this.createBall(600, 190, 15);
+    const ball3 = this.createBall(600, 190, 15);
+    this.me = ball3;
   }
   createBall(posX, posY, radius) {
     const ballFixDef = {
@@ -108,6 +110,7 @@ export default class Game extends Phaser.Scene {
 
     // a body can have anything in its user data, normally it's used to store its sprite
     circle.setUserData(userData);
+    return circle;
   }
   // here we go with some Box2D stuff
   // arguments: x, y coordinates of the center, with and height of the box, in pixels
@@ -155,6 +158,14 @@ export default class Game extends Phaser.Scene {
 
     // a body can have anything in its user data, normally it's used to store its sprite
     box.setUserData(userData);
+    // Testing Movements
+    this.inputKeys = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+    })
+
   }
 
   update() {
@@ -179,6 +190,22 @@ export default class Game extends Phaser.Scene {
       userData.x = bodyPosition.x * this.worldScale;
       userData.y = bodyPosition.y * this.worldScale;
       userData.rotation = bodyAngle;
+    }
+    if(this.inputKeys.up.isDown) {
+      console.log("pressed W",this.me);
+      this.me.applyForceToCenter(planck.Vec2(0,-60))
+    }
+    if(this.inputKeys.left.isDown) {
+      console.log("pressed A",this.me);
+      this.me.applyForceToCenter(planck.Vec2(-30,0))
+    }
+    if(this.inputKeys.right.isDown) {
+      console.log("pressed D",this.me);
+      this.me.applyForceToCenter(planck.Vec2(30,0))
+    }
+    if(this.inputKeys.down.isDown) {
+      console.log("pressed S",this.me);
+      this.me.applyForceToCenter(planck.Vec2(0,30))
     }
   }
 }

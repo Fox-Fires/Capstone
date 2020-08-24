@@ -1,7 +1,11 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-const app = admin.initializeApp();
+admin.initializeApp();
+
+const express = require("express");
+const app = express();
+
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -11,27 +15,32 @@ exports.helloWorlds = functions.https.onRequest((request, response) => {
   response.send("Hello from Firebase!");
 });
 
-exports.getPlayer = functions.https.onRequest((req,res)=>{
-  admin.firestore().collection('Player').get()
+app.get('/player', (req,res)=>{
+  admin
+    .firestore()
+    .collection('Player')
+    .get()
     .then(data=>{
       let test = [];
-      data.forEach(doc =>{
-        test.push(doc.data());
+      data.forEach(doc => {
+        test.push({
+          playerId: doc.id,
+          x: doc.data().x,
+          y: doc.data().y
+        });
       })
       return res.json(test);
     })
     .catch(err=>console.error(err))
-})
+});
 
-exports.createPlayer = functions.https.onRequest((req,res)=>{
-  if(req.method !=="POST"){
-    return res.status(400).json({error: 'Method not allowed'});
-  }
+app.post('/player',(req,res)=>{
   const newPlayer = {
     x: req.body.x,
     y: req.body.y
   }
-  admin.firestore()
+  admin
+    .firestore()
     .collection('Player')
     .add(newPlayer)
     .then(doc =>{
@@ -42,3 +51,7 @@ exports.createPlayer = functions.https.onRequest((req,res)=>{
       console.error(err)
     })
 })
+
+
+
+exports.api = functions.https.onRequest(app)
