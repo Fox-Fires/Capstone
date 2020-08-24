@@ -1,12 +1,12 @@
-import React from 'react'
-import { Root } from './components'
+import React from 'react';
+import { Root } from './components';
 
-const App = () =>{
-  return(
+const App = () => {
+  return (
     <div>
       <Root />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

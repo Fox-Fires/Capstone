@@ -1,7 +1,12 @@
-// const db = firebase.database()
+// import * as firebase from 'firebase/app';
 
-const preObject = document.getElementById("object");
+// import 'firebase/database';
+// import 'firebase/firestore';
 
-const dbRefobject = firebase.database().ref().child("object");
+import config from './firebaseConfig';
+firebase.initializeApp(config);
 
-dbRefobject.on("value", (snap) => console.log(snap.val()));
+// Get a reference to the database service
+const database = firebase.database();
+
+export { database };
