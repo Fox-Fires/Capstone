@@ -7,6 +7,7 @@ export default class Game extends Phaser.Scene {
     });
     this.destroy = this.destroy.bind(this);
     this.me = null;
+    this.clicked = false;
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -68,16 +69,19 @@ export default class Game extends Phaser.Scene {
     // createBox is a method I wrote to create a box, see how it works at line 55
     const floorSensor = this.createBox(800 / 2, 600 - 20, 800, 40, false, true);
     const floor = this.createBox(800 / 2, 600 - 20, 800, 40, false, false);
-    const wallTop = this.createBox(800 / 2, 20, 800, 40,false,false)
-    const wallLeft = this.createBox(20,600/2,40,600,false,false)
-    const wallRight = this.createBox(800-20,600/2,40,600,false,false)
+    const wallTop = this.createBox(800 / 2, 20, 800, 40, false, false);
+    const wallLeft = this.createBox(20, 600 / 2, 40, 600, false, false);
+    const wallRight = this.createBox(800 - 20, 600 / 2, 40, 600, false, false);
     // const ball2 = this.createBall(400, 100, 15);
     const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
     const ball1 = this.createBall(200, 60, 15);
     const ball3 = this.createBall(600, 190, 15);
+    this.createBall(615, 190, 15);
     this.me = ball3;
-
+    // console.log(this.me.m_userData);
+    // console.log(this.me.m_userData.x);
+    // console.log(this.me.m_userData.y);
     // Testing Movements
     this.inputKeys = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
@@ -85,6 +89,43 @@ export default class Game extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.A,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
+    this.input.on(
+      "pointerdown",
+      function (pointer) {
+        let difx = this.me.m_userData.x - pointer.x;
+        let dify = this.me.m_userData.y - pointer.y;
+
+        // console.log("down, pointer, ball", pointer, this.me.m_userData);
+        if (Math.hypot(difx, dify) <= 15) {
+          this.clicked = true;
+        }
+        // console.log(this.clicked);
+      },
+      this
+    );
+    this.input.on(
+      "pointerup",
+      function (pointer) {
+        let difx = this.me.m_userData.x - pointer.x;
+        let dify = this.me.m_userData.y - pointer.y;
+        // console.log("up", difx, dify);
+        if (this.clicked) {
+          this.me.applyLinearImpulse(
+            planck.Vec2(difx / 2, dify / 2),
+            planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
+            true
+          );
+        }
+        this.clicked = false;
+      },
+      this
+    );
+    // this.cameras.main.startFollow(this.me.getUserData());
+    // this.input.on('pointerdown', function (pointer) {
+    //   let vec = this.me.applyLinearImpulseToCenter(planck.Vec2(-pointer.x, -pointer.y), true)
+    // }, this)
+    // this.input.setDraggable(this.me.userData);
+    // console.log(this.me);
   }
   createBall(posX, posY, radius) {
     const ballFixDef = {
@@ -194,16 +235,38 @@ export default class Game extends Phaser.Scene {
       userData.rotation = bodyAngle;
     }
     if (this.inputKeys.up.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(0, -60), true);
+      // this.me.applyForceToCenter(planck.Vec2(0, -60), true);
+      // console.log(this.me.m_userData.y);
+      this.me.applyLinearImpulse(
+        planck.Vec2(0, -5),
+        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
+        true
+      );
     }
     if (this.inputKeys.left.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(-30, 0), true);
+      // this.me.applyForceToCenter(planck.Vec2(-30, 0), true);
+      this.me.applyLinearImpulse(
+        planck.Vec2(-5, 0),
+        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
+        true
+      );
     }
     if (this.inputKeys.right.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(30, 0), true);
+      // this.me.applyForceToCenter(planck.Vec2(30, 0), true);
+      this.me.applyLinearImpulse(
+        planck.Vec2(5, 0),
+        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
+        true
+      );
     }
     if (this.inputKeys.down.isDown) {
-      this.me.applyForceToCenter(planck.Vec2(0, 30), true);
+      // this.me.applyForceToCenter(planck.Vec2(0, 30), true);
+      this.me.applyLinearImpulse(
+        planck.Vec2(0, 5),
+        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
+        true
+      );
+      // console.log("hell yea");
     }
   }
 }
