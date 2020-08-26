@@ -18,14 +18,15 @@ class Game extends planck.World {
   }
 
   startGame() {
-    setInterval(this.step, dt);
+    setInterval(this.update, dt);
   }
 
   endGame() {
-    clearInterval(this.step);
+    clearInterval(this.update);
   }
 
   addUser(id) {
+    console.log('WE ADDING');
     const user = this.createDynamicBody(ballBodyDef);
     user.createFixture(planck.Circle(radius / worldScale), ballFixtureDef);
     user.setPosition(planck.Vec2(600 / worldScale, 190 / worldScale));
@@ -70,11 +71,13 @@ class Game extends planck.World {
     }
   }
 
-  step() {
-    super.step(dt);
+  update() {
+    console.log('🦹‍♂️', this.findNewContacts);
+    this.step(dt);
     this.clearForces();
     if (this.shouldWriteData) {
       // write to database
+      this.write();
       this.shouldWriteData = false;
     } else {
       this.shouldWriteData = true;

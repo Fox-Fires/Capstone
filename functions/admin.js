@@ -6,4 +6,4 @@ admin.initializeApp({
   databaseURL: 'https://capstonegolf-67769.firebaseio.com',
 });
 
-export const db = admin.database();
+exports.db = admin.database();

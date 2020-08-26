@@ -1,26 +1,26 @@
-export const worldScale = 30; // pixels/meter
+exports.worldScale = 30; // pixels/meter
 
-export const ballFixtureDef = {
+exports.ballFixtureDef = {
   friction: 0.1,
   restitution: 0.9,
   density: 1,
   userData: 'ball',
 };
 
-export const ballBodyDef = {
+exports.ballBodyDef = {
   linearDamping: 1.5,
   angularDamping: 1,
 };
 
-export const userRadius = 15;
+exports.userRadius = 15;
 
-export const railFixtureDef = {
+exports.railFixtureDef = {
   friction: 0.1,
   restitution: 0.09,
   userData: 'rail',
 };
 
-export const dt = 1000 / 60;
+exports.dt = 1000 / 60;
 
 /**************
  *** Levels ***
@@ -33,6 +33,6 @@ const test = [
   { x: 780, y: 300, w: 40, h: 600 }, // 800 - 20, 600 / 2, 40, 600
 ];
 
-export const barriers = {
+exports.barriers = {
   test,
 };

@@ -1,8 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const Game = require('./physics');
+const { Game } = require('./physics');
 
-admin.initializeApp();
+// admin.initializeApp();
 
 const express = require('express');
 const app = express();
@@ -54,6 +54,7 @@ app.post('/player', (req, res) => {
 
 exports.api = functions.https.onRequest(app);
 
+// console.log('😛😋', Game.Game);
 const game = new Game();
 game.addUser('mike');
 game.startGame();
