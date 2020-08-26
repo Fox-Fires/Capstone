@@ -2,6 +2,7 @@ import planck from "planck-js";
 import firebase from "firebase/app";
 import "firebase/database";
 import firebaseConfig from "../../Firebase/firebaseConfig";
+
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
@@ -84,6 +85,8 @@ export default class Game extends Phaser.Scene {
     const ball3 = this.createBall(600, 190, 15);
     this.createBall(615, 190, 15);
     this.me = ball3;
+    this.ball1 = ball1;
+    this.ball2 = ball;
     // console.log(this.me.m_userData);
     // console.log(this.me.m_userData.x);
     // console.log(this.me.m_userData.y);
@@ -281,7 +284,6 @@ export default class Game extends Phaser.Scene {
         .database()
         .ref("testGame/testUser")
         .set({
-          // this.m_userData: this.me.m_userData,
           x: Math.round(this.me.m_userData.x),
           y: Math.round(this.me.m_userData.y),
         });
