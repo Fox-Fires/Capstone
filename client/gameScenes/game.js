@@ -1,5 +1,7 @@
 import planck from "planck-js";
-
+import firebase from "firebase/app";
+import "firebase/database";
+import firebaseConfig from "../../Firebase/firebaseConfig";
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
@@ -8,6 +10,9 @@ export default class Game extends Phaser.Scene {
     this.destroy = this.destroy.bind(this);
     this.me = null;
     this.clicked = false;
+    firebase.initializeApp(firebaseConfig);
+    this.previousX = 0;
+    this.previousY = 0;
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -268,5 +273,20 @@ export default class Game extends Phaser.Scene {
       );
       // console.log("hell yea");
     }
+    if (
+      Math.round(this.me.m_userData.x) != this.previousX ||
+      Math.round(this.me.m_userData.y) != this.previousY
+    ) {
+      firebase
+        .database()
+        .ref("testGame/testUser")
+        .set({
+          // this.m_userData: this.me.m_userData,
+          x: Math.round(this.me.m_userData.x),
+          y: Math.round(this.me.m_userData.y),
+        });
+    }
+    this.previousX = Math.round(this.me.m_userData.x);
+    this.previousY = Math.round(this.me.m_userData.y);
   }
 }
