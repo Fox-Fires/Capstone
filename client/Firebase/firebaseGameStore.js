@@ -1,8 +1,8 @@
-import app from "firebase/app";
-import "firebase/auth";
-import "firebase/database";
-import firebaseConfig from "./firebaseConfig";
-// import "firebase/firestore";
+// import app from "firebase/app";
+// import "firebase/auth";
+// import "firebase/database";
+// import firebaseConfig from "./firebaseConfig";
+// // import "firebase/firestore";
 
 const game = document.getElementById("game");
 
@@ -36,3 +36,9 @@ export default class FirebaseDB {
 export function updateUser(ball) {
   db.ref("game").set(ball.x, ball.y);
 }
+const thisPlayerRef = firebase.database().ref(`testGame/${this.playerNumber}`);
+thisPlayerRef.onDisconnect().set({});
+const playersRef = firebase.database().ref("testGame/");
+playersRef.on("value", (snapshot) => {
+  this.updatePlayerPositions(snapshot.val());
+});

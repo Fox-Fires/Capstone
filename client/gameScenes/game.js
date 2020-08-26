@@ -17,6 +17,7 @@ export default class Game extends Phaser.Scene {
     this.playerNumber = Math.random().toString().split(".")[1];
     this.database = firebase.database();
     this.allPlayers = {};
+    this.getPlayers = this.getPlayers.bind(this);
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -227,36 +228,17 @@ export default class Game extends Phaser.Scene {
     // a body can have anything in its user data, normally it's used to store its sprite
     box.setUserData(userData);
   }
-  updatePlayerPositions(data) {
+  getPlayers() {
+    let newPlayers = firebase.database().ref(`testGame/${this.playerNumber}`);
+    // .child(`${this.playerNumber}`);
+    this.allPlayers = newPlayers;
+  }
+  updatePlayerPositions() {
+    this.getPlayers();
+    console.log("🪀Work:", this.allPlayers);
     Object.keys(this.allPlayers).forEach((characterKey) => {
-      if (!data[characterKey]) {
-        this.allPlayers[characterKey].destroy();
-      }
-    });
-
-    Object.keys(data).forEach((characterKey) => {
       if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
-        const incomingData = data[characterKey];
-        const existingCharacter = this.allPlayers[characterKey];
-        existingCharacter.x = incomingData.x;
-        existingCharacter.y = incomingData.y;
-        // existingCharacter.body.velocity.x = 0;
-        // existingCharacter.body.velocity.y = 0;
-        // existingCharacter.anims.play(incomingData.animation, true);
-      } else if (
-        !this.allPlayers[characterKey] &&
-        characterKey != this.playerNumber
-      ) {
-        const newCharacterData = data[characterKey];
-        const newCharacter = this.createBall(
-          newCharacterData.x,
-          newCharacterData.y,
-          15
-        );
-        this.physics.add.collider(newCharacter, this.platforms);
-        this.physics.add.collider(this.player, newCharacter);
-        this.allPlayers[characterKey] = newCharacter;
-      } else {
+        const incomingData = characterKey;
       }
     });
   }
@@ -329,8 +311,8 @@ export default class Game extends Phaser.Scene {
           x: Math.round(this.me.m_userData.x),
           y: Math.round(this.me.m_userData.y),
         });
+      this.previousX = Math.round(this.me.m_userData.x);
+      this.previousY = Math.round(this.me.m_userData.y);
     }
-    this.previousX = Math.round(this.me.m_userData.x);
-    this.previousY = Math.round(this.me.m_userData.y);
   }
 }
