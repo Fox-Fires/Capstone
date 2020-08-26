@@ -9,7 +9,7 @@ const {
 } = require('./constants');
 const { db } = require('./admin');
 
-export class Game extends planck.World {
+class Game extends planck.World {
   constructor(config) {
     super(config || {});
     this.shouldWriteData = true;
@@ -39,6 +39,9 @@ export class Game extends planck.World {
       id,
     });
     this.users[id] = user;
+
+    user.applyForceToCenter(planck.Vec2(-30, 0));
+
     return user;
   }
 
@@ -68,7 +71,7 @@ export class Game extends planck.World {
   }
 
   step() {
-    super().step(dt);
+    super.step(dt);
     this.clearForces();
     if (this.shouldWriteData) {
       // write to database
@@ -78,3 +81,5 @@ export class Game extends planck.World {
     }
   }
 }
+
+exports.Game = Game;
