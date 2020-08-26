@@ -9,9 +9,9 @@ const {
 } = require('./constants');
 const { db } = require('./admin');
 
-class Game {
+class Game extends planck.World {
   constructor(config) {
-    this.world = planck.World(config || {});
+    super(config || {});
     this.shouldWriteData = true;
     this.users = {};
     this.timer = null;
@@ -29,7 +29,7 @@ class Game {
   }
 
   addUser(id) {
-    const user = this.world.createDynamicBody(ballBodyDef);
+    const user = this.createDynamicBody(ballBodyDef);
     console.log(planck.Circle);
     user.createFixture(planck.Circle(radius / worldScale), ballFixtureDef);
     user.setPosition(
@@ -54,7 +54,7 @@ class Game {
   removePlayer(id) {}
 
   addBarier({ x, y, w, h }) {
-    const barrier = this.world.createBody();
+    const barrier = this.createBody();
     barrier.createFixture(
       planck.Box(w / 2 / worldScale, h / 2 / worldScale),
       railFixtureDef
@@ -70,7 +70,7 @@ class Game {
 
   write() {
     // const data = {};
-    for (let b = this.world.getBodyList(); b; b = b.getNext()) {
+    for (let b = this.getBodyList(); b; b = b.getNext()) {
       if (b.getUserData().type === 'user') {
         this.writeUser(b);
       }
@@ -88,9 +88,9 @@ class Game {
   update() {
     console.log('time step ⏱ ', dt / 1000);
     console.log(this.step);
-    this.world.step(dt / 1000);
+    this.step(dt / 1000);
     // this.step();
-    this.world.clearForces();
+    this.clearForces();
     if (this.shouldWriteData) {
       this.write();
       this.shouldWriteData = false;
