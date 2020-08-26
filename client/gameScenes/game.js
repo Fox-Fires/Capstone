@@ -14,6 +14,9 @@ export default class Game extends Phaser.Scene {
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
+    this.playerNumber = Math.random().toString().split(".")[1];
+    this.database = firebase.database();
+    this.allPlayers = {};
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -79,14 +82,12 @@ export default class Game extends Phaser.Scene {
     const wallLeft = this.createBox(20, 600 / 2, 40, 600, false, false);
     const wallRight = this.createBox(800 - 20, 600 / 2, 40, 600, false, false);
     // const ball2 = this.createBall(400, 100, 15);
-    const ball = this.createBall(400, 250, 15);
+    // const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
-    const ball1 = this.createBall(200, 60, 15);
-    const ball3 = this.createBall(600, 190, 15);
-    this.createBall(615, 190, 15);
-    this.me = ball3;
-    this.ball1 = ball1;
-    this.ball2 = ball;
+    // const ball1 = this.createBall(200, 60, 15);
+    // const ball3 = this.createBall(600, 190, 15);
+    // this.createBall(615, 190, 15);
+    this.me = this.createBall(400, 100, 15);
     // console.log(this.me.m_userData);
     // console.log(this.me.m_userData.x);
     // console.log(this.me.m_userData.y);
@@ -134,6 +135,14 @@ export default class Game extends Phaser.Scene {
     // }, this)
     // this.input.setDraggable(this.me.userData);
     // console.log(this.me);
+    const thisPlayerRef = firebase
+      .database()
+      .ref(`testGame/${this.playerNumber}`);
+    thisPlayerRef.onDisconnect().set({});
+    const playersRef = firebase.database().ref("testGame/");
+    playersRef.on("value", (snapshot) => {
+      this.updatePlayerPositions(snapshot.val());
+    });
   }
   createBall(posX, posY, radius) {
     const ballFixDef = {
@@ -218,6 +227,39 @@ export default class Game extends Phaser.Scene {
     // a body can have anything in its user data, normally it's used to store its sprite
     box.setUserData(userData);
   }
+  updatePlayerPositions(data) {
+    Object.keys(this.allPlayers).forEach((characterKey) => {
+      if (!data[characterKey]) {
+        this.allPlayers[characterKey].destroy();
+      }
+    });
+
+    Object.keys(data).forEach((characterKey) => {
+      if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
+        const incomingData = data[characterKey];
+        const existingCharacter = this.allPlayers[characterKey];
+        existingCharacter.x = incomingData.x;
+        existingCharacter.y = incomingData.y;
+        // existingCharacter.body.velocity.x = 0;
+        // existingCharacter.body.velocity.y = 0;
+        // existingCharacter.anims.play(incomingData.animation, true);
+      } else if (
+        !this.allPlayers[characterKey] &&
+        characterKey != this.playerNumber
+      ) {
+        const newCharacterData = data[characterKey];
+        const newCharacter = this.createBall(
+          newCharacterData.x,
+          newCharacterData.y,
+          15
+        );
+        this.physics.add.collider(newCharacter, this.platforms);
+        this.physics.add.collider(this.player, newCharacter);
+        this.allPlayers[characterKey] = newCharacter;
+      } else {
+      }
+    });
+  }
 
   update() {
     // advance the simulation by 1/20 seconds
@@ -282,7 +324,7 @@ export default class Game extends Phaser.Scene {
     ) {
       firebase
         .database()
-        .ref("testGame/testUser")
+        .ref(`testGame/${this.playerNumber}`)
         .set({
           x: Math.round(this.me.m_userData.x),
           y: Math.round(this.me.m_userData.y),
