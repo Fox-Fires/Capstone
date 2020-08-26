@@ -58,5 +58,7 @@ exports.api = functions.https.onRequest(app);
 const game = new Game();
 game.addUser('mike');
 game.startGame();
-setTimeout(game.endGame, 1000);
-game.endGame();
+setTimeout(() => {
+  game.endGame();
+  console.log('game ended');
+}, 3000 / 30);

@@ -14,17 +14,18 @@ class Game extends planck.World {
     super(config || {});
     this.shouldWriteData = true;
     this.users = {};
+    this.timer = null;
     // this.gameId = admin.database().ref('games').push().key;
     this.update = this.update.bind(this);
     this.write = this.write.bind(this);
   }
 
   startGame() {
-    setInterval(this.update, dt);
+    this.timer = setInterval(this.update, dt);
   }
 
   endGame() {
-    clearInterval(this.update);
+    clearInterval(this.timer);
   }
 
   addUser(id) {
@@ -42,7 +43,7 @@ class Game extends planck.World {
     });
     this.users[id] = user;
 
-    // user.applyForceToCenter(planck.Vec2(-30, 0));
+    user.applyLinearImpulse(planck.Vec2(-300, 0), user.getUserData(), true);
 
     return user;
   }
@@ -72,6 +73,7 @@ class Game extends planck.World {
   }
 
   writeUser(user) {
+    console.log(user.getPosition());
     db.ref('games/testGame/users/testUser').set({
       x: user.getPosition().x,
       y: user.getPosition().y,
@@ -79,7 +81,7 @@ class Game extends planck.World {
   }
 
   update() {
-    super.step(dt);
+    this.step();
     this.clearForces();
     if (this.shouldWriteData) {
       this.write();
