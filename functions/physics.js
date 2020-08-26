@@ -15,6 +15,8 @@ class Game extends planck.World {
     this.shouldWriteData = true;
     this.users = {};
     // this.gameId = admin.database().ref('games').push().key;
+    this.update = this.update.bind(this);
+    this.write = this.write.bind(this);
   }
 
   startGame() {
@@ -26,7 +28,6 @@ class Game extends planck.World {
   }
 
   addUser(id) {
-    console.log('WE ADDING');
     const user = this.createDynamicBody(ballBodyDef);
     user.createFixture(planck.Circle(radius / worldScale), ballFixtureDef);
     user.setPosition(planck.Vec2(600 / worldScale, 190 / worldScale));
@@ -36,12 +37,12 @@ class Game extends planck.World {
       I: 0,
     });
     user.setUserData({
-      type: 'player',
+      type: 'user',
       id,
     });
     this.users[id] = user;
 
-    user.applyForceToCenter(planck.Vec2(-30, 0));
+    // user.applyForceToCenter(planck.Vec2(-30, 0));
 
     return user;
   }
@@ -64,19 +65,23 @@ class Game extends planck.World {
   write() {
     // const data = {};
     for (let b = this.getBodyList(); b; b = b.getNext()) {
-      db.ref('games/testGame/users/testUser').set({
-        x: b.getPosition().x,
-        y: b.getPosition().y,
-      });
+      if (b.getUserData().type === 'user') {
+        this.writeUser(b);
+      }
     }
   }
 
+  writeUser(user) {
+    db.ref('games/testGame/users/testUser').set({
+      x: user.getPosition().x,
+      y: user.getPosition().y,
+    });
+  }
+
   update() {
-    console.log('🦹‍♂️', this.findNewContacts);
-    this.step(dt);
+    super.step(dt);
     this.clearForces();
     if (this.shouldWriteData) {
-      // write to database
       this.write();
       this.shouldWriteData = false;
     } else {
