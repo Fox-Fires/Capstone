@@ -61,4 +61,4 @@ game.startGame();
 setTimeout(() => {
   game.endGame();
   console.log('game ended');
-}, 3000 / 30);
+}, 6000 / 30);

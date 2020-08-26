@@ -30,8 +30,11 @@ class Game extends planck.World {
 
   addUser(id) {
     const user = this.createDynamicBody(ballBodyDef);
+    console.log(planck.Circle);
     user.createFixture(planck.Circle(radius / worldScale), ballFixtureDef);
-    user.setPosition(planck.Vec2(600 / worldScale, 190 / worldScale));
+    user.setPosition(
+      planck.Vec2((2 * 600) / worldScale, (3 * 190) / worldScale)
+    );
     user.setMassData({
       mass: 1,
       center: planck.Vec2(),
@@ -43,10 +46,12 @@ class Game extends planck.World {
     });
     this.users[id] = user;
 
-    user.applyLinearImpulse(planck.Vec2(-300, 0), user.getUserData(), true);
+    // user.applyLinearImpulse(planck.Vec2(-300, 0), user.getPosition(), true);
 
     return user;
   }
+
+  removePlayer(id) {}
 
   addBarier({ x, y, w, h }) {
     const barrier = this.createBody();
@@ -73,7 +78,7 @@ class Game extends planck.World {
   }
 
   writeUser(user) {
-    console.log(user.getPosition());
+    console.log('position 🗺 ', user.getPosition());
     db.ref('games/testGame/users/testUser').set({
       x: user.getPosition().x,
       y: user.getPosition().y,
@@ -81,7 +86,10 @@ class Game extends planck.World {
   }
 
   update() {
-    this.step();
+    console.log('time step ⏱ ', dt / 1000);
+    console.log(this.step);
+    this.step(dt / 1000);
+    // this.step();
     this.clearForces();
     if (this.shouldWriteData) {
       this.write();
