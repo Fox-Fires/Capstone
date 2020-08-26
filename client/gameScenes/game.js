@@ -126,6 +126,8 @@ export default class Game extends Phaser.Scene {
     // }, this)
     // this.input.setDraggable(this.me.userData);
     // console.log(this.me);
+
+    console.log(this.world);
   }
   createBall(posX, posY, radius) {
     const ballFixDef = {

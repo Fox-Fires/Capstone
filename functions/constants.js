@@ -10,6 +10,7 @@ exports.ballFixtureDef = {
 exports.ballBodyDef = {
   linearDamping: 1.5,
   angularDamping: 1,
+  awake: true,
 };
 
 exports.userRadius = 15;

@@ -11,13 +11,15 @@ const { db } = require('./admin');
 
 class Game extends planck.World {
   constructor(config) {
-    super(config || {});
+    // super(config || {});
+    super();
     this.shouldWriteData = true;
     this.users = {};
     this.timer = null;
     // this.gameId = admin.database().ref('games').push().key;
     this.update = this.update.bind(this);
     this.write = this.write.bind(this);
+    this.step = this.step.bind(this);
   }
 
   startGame() {
@@ -30,7 +32,6 @@ class Game extends planck.World {
 
   addUser(id) {
     const user = this.createDynamicBody(ballBodyDef);
-    console.log(planck.Circle);
     user.createFixture(planck.Circle(radius / worldScale), ballFixtureDef);
     user.setPosition(
       planck.Vec2((2 * 600) / worldScale, (3 * 190) / worldScale)
@@ -38,7 +39,7 @@ class Game extends planck.World {
     user.setMassData({
       mass: 1,
       center: planck.Vec2(),
-      I: 0,
+      I: 1,
     });
     user.setUserData({
       type: 'user',
@@ -48,6 +49,7 @@ class Game extends planck.World {
 
     // user.applyLinearImpulse(planck.Vec2(-300, 0), user.getPosition(), true);
 
+    console.log('transform 🤖 ', user.m_xf);
     return user;
   }
 
@@ -79,6 +81,8 @@ class Game extends planck.World {
 
   writeUser(user) {
     console.log('position 🗺 ', user.getPosition());
+    console.log(user.massData());
+
     db.ref('games/testGame/users/testUser').set({
       x: user.getPosition().x,
       y: user.getPosition().y,
@@ -86,10 +90,8 @@ class Game extends planck.World {
   }
 
   update() {
-    console.log('time step ⏱ ', dt / 1000);
-    console.log(this.step);
-    this.step(dt / 1000);
     // this.step();
+    this.step(dt / 1000);
     this.clearForces();
     if (this.shouldWriteData) {
       this.write();
