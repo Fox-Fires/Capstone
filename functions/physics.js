@@ -11,8 +11,7 @@ const { db } = require('./admin');
 
 class Game extends planck.World {
   constructor(config) {
-    // super(config || {});
-    super();
+    super(config || {});
     this.shouldWriteData = true;
     this.users = {};
     this.timer = null;
