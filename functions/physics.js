@@ -58,6 +58,7 @@ export class Game extends planck.World {
   }
 
   write() {
+    // const data = {};
     for (let b = this.getBodyList(); b; b = b.getNext()) {
       db.ref('games/testGame/users/testUser').set({
         x: b.getPosition().x,
