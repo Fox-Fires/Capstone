@@ -13,14 +13,15 @@ const { db } = require('./admin');
 // class Game {
 class Game extends planck.World {
   constructor(config) {
-    // super(config || {});
-    super(planck.Vec2(0, 30));
+    super(config || {});
     this.shouldWriteData = true;
     this.users = {};
     this.timer = null;
-    this.gameId = admin.database().ref('games').push().key;
+    this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
     // this.write = this.write.bind(this);
+
+    db.ref(`games/${this.gameId}`).onDisconnect().set({});
   }
 
   startGame() {
@@ -30,7 +31,7 @@ class Game extends planck.World {
 
   endGame() {
     // stop updating physics engine
-    clearInterval(this.timer);
+    if (this.timer) clearInterval(this.timer);
 
     // remove any users still in the game
     Object.keys(this.users).forEach((userId) =>
@@ -43,11 +44,12 @@ class Game extends planck.World {
 
   addUser(x, y, userName) {
     // make new user in DB
-    const id = db.ref(`games/${this.gameId}/users`).push({
+    const id = db.ref(`games/${this.gameId}/users`).push().key;
+    db.ref(`games/${this.gameId}/users/${id}`).set({
       x,
       y,
       bodyAngle: 0,
-    }).key;
+    });
 
     // add user to physics
     const user = this.createDynamicBody(ballBodyDef);
@@ -58,7 +60,13 @@ class Game extends planck.World {
       type: 'user',
       userName,
       id,
+      prevX: x,
+      prevY: y,
     });
+
+    // make prev x
+    // user.prevX = x;
+    // user.prevY = y;
 
     // add user to object for quick access
     this.users[id] = user;
@@ -70,15 +78,14 @@ class Game extends planck.World {
     this.destroyBody(user);
 
     // remove user from this.users
-    const userName = user.getUserData().id;
+    const userId = user.getUserData().id;
     delete this.users[userId];
 
     // remove user reference in db
-    const userId = user.getUserData().id;
     db.ref(`games/${this.gameId}/users/${userId}`).set({});
   }
 
-  addBarier({ x, y, w, h }) {
+  addBarrier(x, y, w, h) {
     const barrier = this.createBody();
     barrier.createFixture(
       planck.Box(w / 2 / worldScale, h / 2 / worldScale),
@@ -90,6 +97,11 @@ class Game extends planck.World {
       center: planck.Vec2(),
       I: 1,
     });
+
+    barrier.setUserData({
+      type: 'barrier',
+    });
+
     return barrier;
   }
 
@@ -109,13 +121,24 @@ class Game extends planck.World {
   writeUser(user) {
     const pos = user.getPosition().mul(worldScale);
     const gameId = this.gameId;
-    const userId = user.getUserData().id;
+    const userData = user.getUserData();
+    const userId = userData.id;
     const bodyAngle = user.getAngle();
-    db.ref(`games/${gameId}/users/${userId}`).set({
-      x: pos.x,
-      y: pos.y,
-      bodyAngle: bodyAngle,
-    });
+    const prevX = userData.prevX;
+    const prevY = userData.prevY;
+
+    if (pos.x !== prevX || pos.y !== prevY) {
+      db.ref(`games/${gameId}/users/${userId}`).set({
+        x: pos.x,
+        y: pos.y,
+        bodyAngle: bodyAngle,
+      });
+      user.setUserData({
+        ...user.getUserData(),
+        prevX: pos.x,
+        prevY: pos.y,
+      });
+    }
   }
 
   update() {
