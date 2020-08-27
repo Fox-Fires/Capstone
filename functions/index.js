@@ -53,14 +53,3 @@ app.post('/player', (req, res) => {
 });
 
 exports.api = functions.https.onRequest(app);
-
-// Test physics engine
-const game = new Game();
-game.addUser(100, 100, 'mike');
-game.addBarrier(300, 400, 1000, 100);
-
-game.startGame();
-setTimeout(() => {
-  game.endGame();
-  console.log('game ended');
-}, 6000 / 30);
