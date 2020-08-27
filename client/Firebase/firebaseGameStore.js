@@ -8,7 +8,7 @@ const game = document.getElementById("game");
 
 export default class FirebaseDB {
   constructor() {
-    app.initializeApp(firebaseConfig);
+    // app.initializeApp(firebaseConfig);
     this.db = app.database();
   }
   makeGame(game) {

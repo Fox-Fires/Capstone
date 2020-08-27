@@ -27,9 +27,8 @@ export default class Game extends Phaser.Scene {
     this.world.destroyBody(body);
   }
   movePlayers(data) {
-    let bodies = this.world.getBodyList();
-    for (let key in bodies) {
-      console.log(`this is the bodies ${key}`);
+    for (let key in this.allPlayers) {
+      console.log(this.allPlayers);
     }
   }
   trackAndRenderPlayers() {
@@ -41,7 +40,7 @@ export default class Game extends Phaser.Scene {
 
     const urlRef = rootRef.child("/");
     urlRef.on("value", (snapshot) => {
-      this.movePlayers(snapshot.val());
+      this.allPlayers = snapshot.val();
     });
     urlRef.once("value", (snapshot) => {
       this.makePlayers(snapshot.val());
@@ -57,7 +56,7 @@ export default class Game extends Phaser.Scene {
   makePlayers(data) {
     for (let key in data) {
       if (key !== this.playerNumber) {
-        this.createBall(data[key].x, data[key].y, 15);
+        this.createBall(data[key].x, data[key].y, 15, data[key]);
       }
     }
   }
@@ -350,5 +349,6 @@ export default class Game extends Phaser.Scene {
       //   }
       // }
     }
+    this.movePlayers();
   }
 }
