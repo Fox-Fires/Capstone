@@ -12,11 +12,15 @@ export default class Game extends Phaser.Scene {
   destroy(body) {
     this.world.destroyBody(body);
   }
+  preload() {
+    this.load.image("Gerg", "./assets/Gerg.png");
+    // this.load.image("King of Club Card", "src/assets/King of Clubs.png");
+  }
   create() {
     // Box2D works with meters. We need to convert meters to pixels.
     // let's say 30 pixels = 1 meter.
     this.worldScale = 30;
-
+    // this.add.image(0, 0, "Gerg");
     // world gravity, as a Vec2 object. It's just a x, y vector
     let gravity = planck.Vec2(0, 1);
     // this is how we create a Box2D world
@@ -77,8 +81,9 @@ export default class Game extends Phaser.Scene {
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
     const ball1 = this.createBall(200, 60, 15);
     const ball3 = this.createBall(600, 190, 15);
+    const gerg = this.createGerg(120, 120, 15);
     this.createBall(615, 190, 15);
-    this.me = ball3;
+    this.me = gerg;
     // console.log(this.me.m_userData);
     // console.log(this.me.m_userData.x);
     // console.log(this.me.m_userData.y);
@@ -122,9 +127,18 @@ export default class Game extends Phaser.Scene {
     );
     this.cameras.main.startFollow(this.me.getUserData());
     this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
-      console.log("ss");
-      this.cameras.main.zoom += deltaX * 0.001;
-      this.cameras.main.zoom -= deltaY * 0.001;
+      if (this.cameras.main.zoom <= 0.6) {
+        if (deltaY < 0) {
+          this.cameras.main.zoom -= deltaY * 0.001;
+        }
+      } else if (this.cameras.main.zoom >= 1.6) {
+        if (deltaY > 0) {
+          this.cameras.main.zoom -= deltaY * 0.001;
+        }
+      } else {
+        this.cameras.main.zoom -= deltaY * 0.001;
+      }
+      // this.cameras.main.zoom -= deltaY * 0.001;
     });
     // this.input.on('pointerdown', function (pointer) {
     //   let vec = this.me.applyLinearImpulseToCenter(planck.Vec2(-pointer.x, -pointer.y), true)
@@ -163,6 +177,43 @@ export default class Game extends Phaser.Scene {
     let userData = this.add.graphics();
     userData.fillStyle(color.color, 1);
     userData.fillCircle(0, 0, radius);
+
+    // a body can have anything in its user data, normally it's used to store its sprite
+    circle.setUserData(userData);
+    return circle;
+  }
+  createGerg(posX, posY, radius) {
+    const ballFixDef = {
+      friction: 0.1,
+      restitution: 0.9,
+      density: 1,
+      userData: "ball",
+    };
+    const ballBodyDef = {
+      linearDamping: 1.5,
+      angularDamping: 3,
+    };
+
+    let circle = this.world.createDynamicBody(ballBodyDef);
+    // circle.setDynamic();
+    circle.createFixture(planck.Circle(radius / this.worldScale), ballFixDef);
+    circle.setPosition(
+      planck.Vec2(posX / this.worldScale, posY / this.worldScale)
+    );
+    circle.setMassData({
+      mass: 1,
+      center: planck.Vec2(),
+
+      // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
+      I: 0.1,
+    });
+    let userData = this.add.image(posX, posY, "Gerg");
+    // var color = new Phaser.Display.Color();
+    // color.random();
+    // color.brighten(50).saturate(100);
+    // let userData = this.add.graphics();
+    // userData.fillStyle(color.color, 1);
+    // userData.fillCircle(0, 0, radius);
 
     // a body can have anything in its user data, normally it's used to store its sprite
     circle.setUserData(userData);
