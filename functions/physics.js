@@ -58,6 +58,8 @@ class Game extends planck.World {
     user.createFixture(planck.Circle(userRadius / worldScale), ballFixtureDef);
     user.setPosition(planck.Vec2(x / worldScale, y / worldScale));
     user.setMassData(ballMassData);
+
+    // set user data for updating logic
     user.setUserData({
       type: 'user',
       userName,
@@ -84,6 +86,7 @@ class Game extends planck.World {
   }
 
   addBarrier(x, y, w, h) {
+    // add barrier to physics world
     const barrier = this.createBody();
     barrier.createFixture(
       planck.Box(w / 2 / worldScale, h / 2 / worldScale),
@@ -92,6 +95,7 @@ class Game extends planck.World {
     barrier.setPosition(planck.Vec2(x / worldScale, y / worldScale));
     barrier.setMassData(railMassData);
 
+    // set user data
     barrier.setUserData({
       type: 'barrier',
     });
@@ -101,6 +105,7 @@ class Game extends planck.World {
 
   write() {
     // const data = {};
+    // write only users to db
     for (let b = this.getBodyList(); b; b = b.getNext()) {
       if (b.getUserData().type === 'user') {
         this.writeUser(b);
@@ -109,6 +114,7 @@ class Game extends planck.World {
   }
 
   writeUser(user) {
+    // pull out relevant information
     const pos = user.getPosition().mul(worldScale);
     const gameId = this.gameId;
     const userData = user.getUserData();
@@ -117,12 +123,15 @@ class Game extends planck.World {
     const prevX = userData.prevX;
     const prevY = userData.prevY;
 
+    // only update if user has moved since last update
     if (pos.x !== prevX || pos.y !== prevY) {
       db.ref(`games/${gameId}/users/${userId}`).set({
         x: pos.x,
         y: pos.y,
         bodyAngle: bodyAngle,
       });
+
+      // update prev x and y
       user.setUserData({
         ...user.getUserData(),
         prevX: pos.x,
