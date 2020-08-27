@@ -1,12 +1,12 @@
-import planck from "planck-js";
-import firebase from "firebase/app";
-import "firebase/database";
-import firebaseConfig from "../../Firebase/firebaseConfig";
+import planck from 'planck-js';
+import firebase from 'firebase/app';
+import 'firebase/database';
+import firebaseConfig from '../../Firebase/firebaseConfig';
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: "Game",
+      key: 'Game',
     });
     this.destroy = this.destroy.bind(this);
     this.me = null;
@@ -14,7 +14,7 @@ export default class Game extends Phaser.Scene {
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
-    this.playerNumber = Math.random().toString().split(".")[1];
+    this.playerNumber = Math.random().toString().split('.')[1];
     this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
@@ -31,13 +31,13 @@ export default class Game extends Phaser.Scene {
       .database()
       .ref(`testGame/${this.playerNumber}`);
     thisPlayerRef.onDisconnect().set({});
-    const rootRef = firebase.database().ref("testGame");
+    const rootRef = firebase.database().ref('testGame');
 
-    const urlRef = rootRef.child("/");
-    urlRef.on("value", (snapshot) => {
+    const urlRef = rootRef.child('/');
+    urlRef.on('value', (snapshot) => {
       user = snapshot.val();
     });
-    urlRef.once("value", (snapshot) => {
+    urlRef.once('value', (snapshot) => {
       this.makePlayers(snapshot.val());
 
       // console.log(user);
@@ -71,16 +71,16 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: "ball",
+      userData: 'ball',
     };
     const railFixDef = {
       friction: 0.1,
       restitution: 0.09,
       isSensor: true,
-      userData: "rail",
+      userData: 'rail',
     };
 
-    this.world.on("post-solve", (contact) => {
+    this.world.on('post-solve', (contact) => {
       const fixtureA = contact.getFixtureA();
       const fixtureB = contact.getFixtureB();
       // if (fixtureB) {
@@ -135,7 +135,7 @@ export default class Game extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
     this.input.on(
-      "pointerdown",
+      'pointerdown',
       function (pointer) {
         let difx = this.me.m_userData.x - pointer.x;
         let dify = this.me.m_userData.y - pointer.y;
@@ -149,7 +149,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointerup",
+      'pointerup',
       function (pointer) {
         let difx = this.me.m_userData.x - pointer.x;
         let dify = this.me.m_userData.y - pointer.y;
@@ -171,6 +171,8 @@ export default class Game extends Phaser.Scene {
     // }, this)
     // this.input.setDraggable(this.me.userData);
     // console.log(this.me);
+
+    console.log(this.world);
   }
 
   createBall(posX, posY, radius) {
@@ -178,7 +180,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: "ball",
+      userData: 'ball',
     };
     const ballBodyDef = {
       linearDamping: 1.5,
@@ -224,7 +226,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.09,
       isSensor: sensor,
-      userData: "rail",
+      userData: 'rail',
     };
     // a body can have one or more fixtures. This is how we create a box fixture inside a body
     box.createFixture(
