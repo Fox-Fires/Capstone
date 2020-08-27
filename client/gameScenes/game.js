@@ -36,9 +36,10 @@ export default class Game extends Phaser.Scene {
     const urlRef = rootRef.child("/");
     urlRef.on("value", (snapshot) => {
       user = snapshot.val();
-      urlRef.once("value", (snapshot) => {
-        this.makePlayers(snapshot.val());
-      });
+    });
+    urlRef.once("value", (snapshot) => {
+      this.makePlayers(snapshot.val());
+
       // console.log(user);
       // for (let key in user) {
       //   if (key !== theNum) {
