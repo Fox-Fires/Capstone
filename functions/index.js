@@ -54,8 +54,3 @@ app.post('/player', (req, res) => {
 });
 
 exports.api = functions.https.onRequest(app);
-
-const game = new Game(planck.Vec2(0, 30));
-game.addUser(100, 100, 'mike');
-
-game.update();
