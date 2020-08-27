@@ -16,13 +16,36 @@ export default class Game extends Phaser.Scene {
     this.previousY = 0;
     this.playerNumber = Math.random().toString().split(".")[1];
     this.database = firebase.database();
-    this.allPlayers = {};
-    this.getPlayers = this.getPlayers.bind(this);
+    this.allPlayers = {
+      key: {
+        x: 0,
+        y: 0,
+      },
+    };
+    this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
   }
   destroy(body) {
     this.world.destroyBody(body);
   }
+  trackAndRenderPlayers() {
+    const thisPlayerRef = firebase
+      .database()
+      .ref(`testGame/${this.playerNumber}`);
+    thisPlayerRef.onDisconnect().set({});
+    const rootRef = firebase.database().ref("testGame");
+
+    const urlRef = rootRef.child("/");
+    urlRef.on("value", function (snapshot) {
+      let user = snapshot.val();
+      for (let key in user) {
+        console.log(`the key: ${key}, the prop: ${user.key.val}`);
+      }
+      console.log(user);
+    });
+  }
+
   create() {
+    this.trackAndRenderPlayers();
     // Box2D works with meters. We need to convert meters to pixels.
     // let's say 30 pixels = 1 meter.
     this.worldScale = 30;
@@ -136,15 +159,8 @@ export default class Game extends Phaser.Scene {
     // }, this)
     // this.input.setDraggable(this.me.userData);
     // console.log(this.me);
-    const thisPlayerRef = firebase
-      .database()
-      .ref(`testGame/${this.playerNumber}`);
-    thisPlayerRef.onDisconnect().set({});
-    const playersRef = firebase.database().ref("testGame/");
-    playersRef.on("value", (snapshot) => {
-      this.updatePlayerPositions(snapshot.val());
-    });
   }
+
   createBall(posX, posY, radius) {
     const ballFixDef = {
       friction: 0.1,
@@ -228,20 +244,16 @@ export default class Game extends Phaser.Scene {
     // a body can have anything in its user data, normally it's used to store its sprite
     box.setUserData(userData);
   }
-  getPlayers() {
-    let newPlayers = firebase.database().ref(`testGame/${this.playerNumber}`);
-    // .child(`${this.playerNumber}`);
-    this.allPlayers = newPlayers;
-  }
-  updatePlayerPositions() {
-    this.getPlayers();
-    console.log("🪀Work:", this.allPlayers);
-    Object.keys(this.allPlayers).forEach((characterKey) => {
-      if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
-        const incomingData = characterKey;
-      }
-    });
-  }
+
+  // updatePlayerPositions() {
+  //   this.getPlayers();
+  //   console.log("🪀Work:", this.allPlayers);
+  //   Object.keys(this.allPlayers).forEach((characterKey) => {
+  //     if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
+  //       const incomingData = characterKey;
+  //     }
+  //   });
+  // }
 
   update() {
     // advance the simulation by 1/20 seconds
