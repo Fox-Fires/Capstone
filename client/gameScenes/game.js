@@ -17,16 +17,22 @@ export default class Game extends Phaser.Scene {
     this.playerNumber = Math.random().toString().split(".")[1];
     this.database = firebase.database();
     this.allPlayers = {};
+    this.previousAllPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
     this.createBall = this.createBall.bind(this);
     this.makePlayers = this.makePlayers.bind(this);
+    this.movePlayers = this.movePlayers.bind(this);
   }
   destroy(body) {
     this.world.destroyBody(body);
   }
-
+  movePlayers(data) {
+    let bodies = this.world.getBodyList();
+    for (let key in bodies) {
+      console.log(`this is the bodies ${key}`);
+    }
+  }
   trackAndRenderPlayers() {
-    let user = {};
     const thisPlayerRef = firebase
       .database()
       .ref(`testGame/${this.playerNumber}`);
@@ -35,7 +41,7 @@ export default class Game extends Phaser.Scene {
 
     const urlRef = rootRef.child("/");
     urlRef.on("value", (snapshot) => {
-      user = snapshot.val();
+      this.movePlayers(snapshot.val());
     });
     urlRef.once("value", (snapshot) => {
       this.makePlayers(snapshot.val());
