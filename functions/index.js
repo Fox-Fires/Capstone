@@ -71,18 +71,3 @@ game.update();
 console.log(game.users['mike'].getPosition());
 game.update();
 console.log(game.users['mike'].getPosition());
-
-// const game = new Game(planck.Vec2(0, 50));
-// game.addUser('mike');
-// game.world.step(1 / 60);
-// game.world.clearForces();
-// console.log(game.users['mike'].getPosition());
-// game.world.step(1 / 60);
-// game.world.clearForces();
-// console.log(game.users['mike'].getPosition());
-// game.world.step(1 / 60);
-// game.world.clearForces();
-// console.log(game.users['mike'].getPosition());
-// game.world.step(1 / 60);
-// game.world.clearForces();
-// console.log(game.users['mike'].getPosition());
