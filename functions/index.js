@@ -1,7 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Game } = require('./physics');
-const planck = require('planck-js');
 
 // admin.initializeApp();
 
@@ -55,19 +54,12 @@ app.post('/player', (req, res) => {
 
 exports.api = functions.https.onRequest(app);
 
-// console.log('😛😋', Game.Game);
+// Test physics engine
 const game = new Game();
 game.addUser('mike');
-// game.startGame();
-// setTimeout(() => {
-//   game.endGame();
-//   console.log('game ended');
-// }, 6000 / 30);
+game.startGame();
+setTimeout(() => {
+  game.endGame();
+  console.log('game ended');
+}, 6000 / 30);
 game.update();
-console.log(game.users['mike'].getPosition());
-game.update();
-console.log(game.users['mike'].getPosition());
-game.update();
-console.log(game.users['mike'].getPosition());
-game.update();
-console.log(game.users['mike'].getPosition());
