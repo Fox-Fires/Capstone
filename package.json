@@ -34,7 +34,6 @@
     "firebase-admin": "^9.1.1",
     "firebase-functions": "^3.11.0",
     "morgan": "^1.10.0",
-    "phaser": "^3.24.1",
     "planck-js": "^0.3.21",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
