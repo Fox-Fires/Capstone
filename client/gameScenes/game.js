@@ -92,8 +92,8 @@ export default class Game extends Phaser.Scene {
     this.input.on(
       "pointerdown",
       function (pointer) {
-        let difx = this.me.m_userData.x - pointer.x;
-        let dify = this.me.m_userData.y - pointer.y;
+        let difx = 400 - pointer.x;
+        let dify = 300 - pointer.y;
 
         // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15) {
@@ -106,8 +106,8 @@ export default class Game extends Phaser.Scene {
     this.input.on(
       "pointerup",
       function (pointer) {
-        let difx = this.me.m_userData.x - pointer.x;
-        let dify = this.me.m_userData.y - pointer.y;
+        let difx = 400 - pointer.x;
+        let dify = 300 - pointer.y;
         // console.log("up", difx, dify);
         if (this.clicked) {
           this.me.applyLinearImpulse(
@@ -120,7 +120,12 @@ export default class Game extends Phaser.Scene {
       },
       this
     );
-    // this.cameras.main.startFollow(this.me.getUserData());
+    this.cameras.main.startFollow(this.me.getUserData());
+    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
+      console.log("ss");
+      this.cameras.main.zoom += deltaX * 0.001;
+      this.cameras.main.zoom -= deltaY * 0.001;
+    });
     // this.input.on('pointerdown', function (pointer) {
     //   let vec = this.me.applyLinearImpulseToCenter(planck.Vec2(-pointer.x, -pointer.y), true)
     // }, this)
