@@ -9,6 +9,7 @@ const {
 } = require('./constants');
 const { db } = require('./admin');
 
+// class Game {
 class Game extends planck.World {
   constructor(config) {
     super(config || {});
