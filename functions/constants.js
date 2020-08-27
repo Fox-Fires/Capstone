@@ -29,6 +29,12 @@ exports.railFixtureDef = {
   userData: 'rail',
 };
 
+exports.railMassData = {
+  mass: 1,
+  center: planck.Vec2(),
+  I: 1,
+};
+
 exports.dt = 1000 / 60;
 
 /**************

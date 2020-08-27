@@ -4,6 +4,7 @@ const {
   ballFixtureDef,
   ballMassData,
   railFixtureDef,
+  railMassData,
   userRadius,
   worldScale,
   dt,
@@ -21,6 +22,7 @@ class Game extends planck.World {
     this.update = this.update.bind(this);
     // this.write = this.write.bind(this);
 
+    // delete game instance if server unexpectedly disconnects
     db.ref(`games/${this.gameId}`).onDisconnect().set({});
   }
 
@@ -64,10 +66,6 @@ class Game extends planck.World {
       prevY: y,
     });
 
-    // make prev x
-    // user.prevX = x;
-    // user.prevY = y;
-
     // add user to object for quick access
     this.users[id] = user;
     return user;
@@ -92,21 +90,13 @@ class Game extends planck.World {
       railFixtureDef
     );
     barrier.setPosition(planck.Vec2(x / worldScale, y / worldScale));
-    barrier.setMassData({
-      mass: 1,
-      center: planck.Vec2(),
-      I: 1,
-    });
+    barrier.setMassData(railMassData);
 
     barrier.setUserData({
       type: 'barrier',
     });
 
     return barrier;
-  }
-
-  putBall(vector, userName) {
-    this.users[userName].applyLinearImpulse();
   }
 
   write() {
