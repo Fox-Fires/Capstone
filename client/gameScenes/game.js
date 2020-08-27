@@ -14,11 +14,50 @@ export default class Game extends Phaser.Scene {
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
+    this.playerNumber = Math.random().toString().split(".")[1];
+    this.database = firebase.database();
+    this.allPlayers = {};
+    this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
+    this.createBall = this.createBall.bind(this);
+    this.makePlayers = this.makePlayers.bind(this);
   }
   destroy(body) {
     this.world.destroyBody(body);
   }
+
+  trackAndRenderPlayers() {
+    let user = {};
+    const thisPlayerRef = firebase
+      .database()
+      .ref(`testGame/${this.playerNumber}`);
+    thisPlayerRef.onDisconnect().set({});
+    const rootRef = firebase.database().ref("testGame");
+
+    const urlRef = rootRef.child("/");
+    urlRef.on("value", (snapshot) => {
+      user = snapshot.val();
+    });
+    urlRef.once("value", (snapshot) => {
+      this.makePlayers(snapshot.val());
+
+      // console.log(user);
+      // for (let key in user) {
+      //   if (key !== theNum) {
+      //     console.log(user);
+      //   }
+      // }
+    });
+  }
+  makePlayers(data) {
+    for (let key in data) {
+      if (key !== this.playerNumber) {
+        this.createBall(data[key].x, data[key].y, 15);
+      }
+    }
+  }
+
   create() {
+    this.trackAndRenderPlayers();
     // Box2D works with meters. We need to convert meters to pixels.
     // let's say 30 pixels = 1 meter.
     this.worldScale = 30;
@@ -79,14 +118,12 @@ export default class Game extends Phaser.Scene {
     const wallLeft = this.createBox(20, 600 / 2, 40, 600, false, false);
     const wallRight = this.createBox(800 - 20, 600 / 2, 40, 600, false, false);
     // const ball2 = this.createBall(400, 100, 15);
-    const ball = this.createBall(400, 250, 15);
+    // const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
-    const ball1 = this.createBall(200, 60, 15);
-    const ball3 = this.createBall(600, 190, 15);
-    this.createBall(615, 190, 15);
-    this.me = ball3;
-    this.ball1 = ball1;
-    this.ball2 = ball;
+    // const ball1 = this.createBall(200, 60, 15);
+    // const ball3 = this.createBall(600, 190, 15);
+    // this.createBall(615, 190, 15);
+    this.me = this.createBall(400, 100, 15);
     // console.log(this.me.m_userData);
     // console.log(this.me.m_userData.x);
     // console.log(this.me.m_userData.y);
@@ -135,6 +172,7 @@ export default class Game extends Phaser.Scene {
     // this.input.setDraggable(this.me.userData);
     // console.log(this.me);
   }
+
   createBall(posX, posY, radius) {
     const ballFixDef = {
       friction: 0.1,
@@ -171,6 +209,7 @@ export default class Game extends Phaser.Scene {
     circle.setUserData(userData);
     return circle;
   }
+
   // here we go with some Box2D stuff
   // arguments: x, y coordinates of the center, with and height of the box, in pixels
   // we'll conver pixels to meters inside the method
@@ -218,6 +257,16 @@ export default class Game extends Phaser.Scene {
     // a body can have anything in its user data, normally it's used to store its sprite
     box.setUserData(userData);
   }
+
+  // updatePlayerPositions() {
+  //   this.getPlayers();
+  //   console.log("🪀Work:", this.allPlayers);
+  //   Object.keys(this.allPlayers).forEach((characterKey) => {
+  //     if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
+  //       const incomingData = characterKey;
+  //     }
+  //   });
+  // }
 
   update() {
     // advance the simulation by 1/20 seconds
@@ -282,13 +331,18 @@ export default class Game extends Phaser.Scene {
     ) {
       firebase
         .database()
-        .ref("testGame/testUser")
+        .ref(`testGame/${this.playerNumber}`)
         .set({
           x: Math.round(this.me.m_userData.x),
           y: Math.round(this.me.m_userData.y),
         });
+      this.previousX = Math.round(this.me.m_userData.x);
+      this.previousY = Math.round(this.me.m_userData.y);
+      // for (let key in this.allPlayers) {
+      //   if (key !== theNum) {
+      //     console.log("allPlayers", this.allPlayers);
+      //   }
+      // }
     }
-    this.previousX = Math.round(this.me.m_userData.x);
-    this.previousY = Math.round(this.me.m_userData.y);
   }
 }
