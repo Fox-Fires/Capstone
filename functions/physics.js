@@ -66,6 +66,7 @@ class Game extends planck.World {
       id,
       prevX: x,
       prevY: y,
+      prevAng: 0,
     });
 
     // add user to object for quick access
@@ -122,9 +123,10 @@ class Game extends planck.World {
     const bodyAngle = user.getAngle();
     const prevX = userData.prevX;
     const prevY = userData.prevY;
+    const prevAng = userData.prevAng;
 
     // only update if user has moved since last update
-    if (pos.x !== prevX || pos.y !== prevY) {
+    if (pos.x !== prevX || pos.y !== prevY || bodyAngle !== prevAng) {
       db.ref(`games/${gameId}/users/${userId}`).set({
         x: pos.x,
         y: pos.y,
@@ -136,6 +138,7 @@ class Game extends planck.World {
         ...user.getUserData(),
         prevX: pos.x,
         prevY: pos.y,
+        prevAng: bodyAngle,
       });
     }
   }

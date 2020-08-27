@@ -31,7 +31,7 @@ exports.railFixtureDef = {
 
 exports.railMassData = {
   mass: 1,
-  center: planck.Vec2(),
+  center: Vec2(),
   I: 1,
 };
 
