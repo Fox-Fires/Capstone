@@ -1,7 +1,7 @@
 const { Game } = require('./Game');
 
 exports.config = {
-  type: Phaser.AUTO,
+  type: Phaser.HEADLESS,
   width: 800,
   height: 600,
   parent: 'physics',

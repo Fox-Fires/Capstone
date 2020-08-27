@@ -1,4 +1,12 @@
+const Vec2 = require('planck-js').Vec2;
+
 exports.worldScale = 30; // pixels/meter
+
+exports.ballBodyDef = {
+  linearDamping: 1.5,
+  angularDamping: 1,
+  awake: true,
+};
 
 exports.ballFixtureDef = {
   friction: 0.1,
@@ -7,10 +15,10 @@ exports.ballFixtureDef = {
   userData: 'ball',
 };
 
-exports.ballBodyDef = {
-  linearDamping: 1.5,
-  angularDamping: 1,
-  awake: true,
+exports.ballMassData = {
+  mass: 1,
+  center: Vec2(),
+  I: 1,
 };
 
 exports.userRadius = 15;

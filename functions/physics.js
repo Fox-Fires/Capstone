@@ -1,9 +1,10 @@
 const planck = require('planck-js');
 const {
-  ballFixtureDef,
   ballBodyDef,
+  ballFixtureDef,
+  ballMassData,
   railFixtureDef,
-  radius,
+  userRadius,
   worldScale,
   dt,
 } = require('./constants');
@@ -13,13 +14,14 @@ const { db } = require('./admin');
 class Game extends planck.World {
   constructor(config) {
     super(config || {});
+    // this.world = planck.World(planck.Vec2(0, 50));
     this.shouldWriteData = true;
     this.users = {};
     this.timer = null;
     // this.gameId = admin.database().ref('games').push().key;
-    this.update = this.update.bind(this);
-    this.write = this.write.bind(this);
-    this.step = this.step.bind(this);
+    // this.update = this.update.bind(this);
+    // this.write = this.write.bind(this);
+    // this.step = this.step.bind(this);
   }
 
   startGame() {
@@ -32,28 +34,18 @@ class Game extends planck.World {
 
   addUser(id) {
     const user = this.createDynamicBody(ballBodyDef);
-    user.createFixture(planck.Circle(radius / worldScale), ballFixtureDef);
-    user.setPosition(
-      planck.Vec2((2 * 600) / worldScale, (3 * 190) / worldScale)
-    );
-    user.setMassData({
-      mass: 1,
-      center: planck.Vec2(),
-      I: 1,
-    });
+    user.createFixture(planck.Circle(userRadius / worldScale), ballFixtureDef);
+    user.setPosition(planck.Vec2(600 / worldScale, 190 / worldScale));
+    user.setMassData(ballMassData);
     user.setUserData({
       type: 'user',
       id,
     });
     this.users[id] = user;
-
-    // user.applyLinearImpulse(planck.Vec2(-300, 0), user.getPosition(), true);
-
-    console.log('transform 🤖 ', user.m_xf);
     return user;
   }
 
-  removePlayer(id) {}
+  removeUser(id) {}
 
   addBarier({ x, y, w, h }) {
     const barrier = this.createBody();
@@ -80,9 +72,6 @@ class Game extends planck.World {
   }
 
   writeUser(user) {
-    console.log('position 🗺 ', user.getPosition());
-    console.log(user.massData());
-
     db.ref('games/testGame/users/testUser').set({
       x: user.getPosition().x,
       y: user.getPosition().y,
@@ -93,12 +82,12 @@ class Game extends planck.World {
     // this.step();
     this.step(dt / 1000);
     this.clearForces();
-    if (this.shouldWriteData) {
-      this.write();
-      this.shouldWriteData = false;
-    } else {
-      this.shouldWriteData = true;
-    }
+    // if (this.shouldWriteData) {
+    //   this.write();
+    //   this.shouldWriteData = false;
+    // } else {
+    //   this.shouldWriteData = true;
+    // }
   }
 }
 

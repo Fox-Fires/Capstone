@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Game } = require('./physics');
+const planck = require('planck-js');
 
 // admin.initializeApp();
 
@@ -63,6 +64,25 @@ game.addUser('mike');
 //   console.log('game ended');
 // }, 6000 / 30);
 game.update();
+console.log(game.users['mike'].getPosition());
 game.update();
+console.log(game.users['mike'].getPosition());
 game.update();
+console.log(game.users['mike'].getPosition());
 game.update();
+console.log(game.users['mike'].getPosition());
+
+// const game = new Game(planck.Vec2(0, 50));
+// game.addUser('mike');
+// game.world.step(1 / 60);
+// game.world.clearForces();
+// console.log(game.users['mike'].getPosition());
+// game.world.step(1 / 60);
+// game.world.clearForces();
+// console.log(game.users['mike'].getPosition());
+// game.world.step(1 / 60);
+// game.world.clearForces();
+// console.log(game.users['mike'].getPosition());
+// game.world.step(1 / 60);
+// game.world.clearForces();
+// console.log(game.users['mike'].getPosition());

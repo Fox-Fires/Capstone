@@ -24,6 +24,7 @@ exports.Game = class Game extends Phaser.Scene {
       density: 1,
       userData: 'ball',
     };
+
     const railFixDef = {
       friction: 0.1,
       restitution: 0.09,
