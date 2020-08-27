@@ -16,18 +16,17 @@ export default class Game extends Phaser.Scene {
     this.previousY = 0;
     this.playerNumber = Math.random().toString().split(".")[1];
     this.database = firebase.database();
-    this.allPlayers = {
-      key: {
-        x: 0,
-        y: 0,
-      },
-    };
+    this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
+    this.createBall = this.createBall.bind(this);
+    this.makePlayers = this.makePlayers.bind(this);
   }
   destroy(body) {
     this.world.destroyBody(body);
   }
+
   trackAndRenderPlayers() {
+    let user = {};
     const thisPlayerRef = firebase
       .database()
       .ref(`testGame/${this.playerNumber}`);
@@ -35,13 +34,25 @@ export default class Game extends Phaser.Scene {
     const rootRef = firebase.database().ref("testGame");
 
     const urlRef = rootRef.child("/");
-    urlRef.on("value", function (snapshot) {
-      let user = snapshot.val();
-      for (let key in user) {
-        console.log(`the key: ${key}, the prop: ${user.key.val}`);
-      }
-      console.log(user);
+    urlRef.on("value", (snapshot) => {
+      user = snapshot.val();
+      urlRef.once("value", (snapshot) => {
+        this.makePlayers(snapshot.val());
+      });
+      // console.log(user);
+      // for (let key in user) {
+      //   if (key !== theNum) {
+      //     console.log(user);
+      //   }
+      // }
     });
+  }
+  makePlayers(data) {
+    for (let key in data) {
+      if (key !== this.playerNumber) {
+        this.createBall(data[key].x, data[key].y, 15);
+      }
+    }
   }
 
   create() {
@@ -197,6 +208,7 @@ export default class Game extends Phaser.Scene {
     circle.setUserData(userData);
     return circle;
   }
+
   // here we go with some Box2D stuff
   // arguments: x, y coordinates of the center, with and height of the box, in pixels
   // we'll conver pixels to meters inside the method
@@ -325,6 +337,11 @@ export default class Game extends Phaser.Scene {
         });
       this.previousX = Math.round(this.me.m_userData.x);
       this.previousY = Math.round(this.me.m_userData.y);
+      // for (let key in this.allPlayers) {
+      //   if (key !== theNum) {
+      //     console.log("allPlayers", this.allPlayers);
+      //   }
+      // }
     }
   }
 }
