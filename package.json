@@ -31,6 +31,7 @@
   "homepage": "https://github.com/Fox-Fires/Capstone#readme",
   "dependencies": {
     "axios": "^0.20.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "firebase": "^7.19.1",
     "firebase-admin": "^9.1.1",

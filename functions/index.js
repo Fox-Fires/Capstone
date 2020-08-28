@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Physics } = require('./physics');
 const planck = require('planck-js');
+const cors = require('cors')
 
 // admin.initializeApp();
 
@@ -16,6 +17,9 @@ exports.helloWorlds = functions.https.onRequest((request, response) => {
   functions.logger.info('Hello logs!', { structuredData: true });
   response.send('Hello from Firebase!');
 });
+
+//Helps avoid cors mismatch between client and server.
+app.use(cors({origin:true}));
 
 app.get('/player', (req, res) => {
   admin
