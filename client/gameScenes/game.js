@@ -8,6 +8,12 @@ export default class Game extends Phaser.Scene {
     this.destroy = this.destroy.bind(this);
     this.me = null;
     this.clicked = false;
+    this.line1;
+    this.graphics;
+    this.pointer;
+    // this.graphics = this.add.graphics({
+    //   fillStyle: { color: 0xff0000 },
+    // });
   }
   destroy(body) {
     this.world.destroyBody(body);
@@ -94,6 +100,9 @@ export default class Game extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.A,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
+    this.graphics = this.add.graphics({
+      fillStyle: { color: 0xff0000 },
+    });
     this.input.on(
       "pointerdown",
       function (pointer) {
@@ -103,8 +112,32 @@ export default class Game extends Phaser.Scene {
         // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15) {
           this.clicked = true;
+          // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
+          // console.log("point xy", pointer.x, pointer.y);
+          this.line1 = new Phaser.Geom.Line(
+            this.me.m_userData.x,
+            this.me.m_userData.y,
+            this.me.m_userData.x - difx,
+            this.me.m_userData.y - dify
+          );
+          const points = this.line1.getPoints(10);
+          for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+
+            this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
+          }
         }
         // console.log(this.clicked);
+      },
+      this
+    );
+    this.input.on(
+      "pointermove",
+      function (pointer) {
+        if (this.clicked) {
+          this.pointer = { x: pointer.x, y: pointer.y };
+          // console.log(" while clicked pointer", this.pointer);
+        }
       },
       this
     );
@@ -138,13 +171,7 @@ export default class Game extends Phaser.Scene {
       } else {
         this.cameras.main.zoom -= deltaY * 0.001;
       }
-      // this.cameras.main.zoom -= deltaY * 0.001;
     });
-    // this.input.on('pointerdown', function (pointer) {
-    //   let vec = this.me.applyLinearImpulseToCenter(planck.Vec2(-pointer.x, -pointer.y), true)
-    // }, this)
-    // this.input.setDraggable(this.me.userData);
-    // console.log(this.me);
   }
   createBall(posX, posY, radius) {
     const ballFixDef = {
@@ -191,7 +218,7 @@ export default class Game extends Phaser.Scene {
     };
     const ballBodyDef = {
       linearDamping: 1.5,
-      angularDamping: 3,
+      angularDamping: 10,
     };
 
     let circle = this.world.createDynamicBody(ballBodyDef);
@@ -323,6 +350,63 @@ export default class Game extends Phaser.Scene {
         true
       );
       // console.log("hell yea");
+    }
+    this.graphics.clear();
+    // this.input.on(
+    //   "pointermove",
+    //   function (pointer) {
+    //     if (this.clicked) {
+    //       console.log("i clicked");
+    //       // Phaser.Geom.Line.RotateAroundPoint(
+    //       //   this.line1,
+    //       //   { x: this.me.m_userData.x, y: this.me.m_userData.y },
+    //       //   0.02
+    //       // );
+    //       this.line1.setTo(
+    //         this.me.m_userData.x,
+    //         this.me.m_userData.y,
+    //         pointer.x,
+    //         pointer.y
+    //       );
+    //       const points = this.line1.getPoints(10);
+    //       for (let i = 0; i < points.length; i++) {
+    //         const p = points[i];
+
+    //         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
+    //       }
+    //     }
+    //   },
+    //   this
+    // );
+    if (this.clicked) {
+      // Phaser.Geom.Line.RotateAroundPoint(
+      //   this.line1,
+      //   { x: this.me.m_userData.x, y: this.me.m_userData.y },
+      //   0.02
+      // );
+      if (this.pointer) {
+        let difx = 400 - this.pointer.x;
+        let dify = 300 - this.pointer.y;
+        this.line1.setTo(
+          this.me.m_userData.x,
+          this.me.m_userData.y,
+          this.me.m_userData.x - difx,
+          this.me.m_userData.y - dify
+        );
+      }
+      // console.log("update pointer yasdf", this.pointer);
+      // this.line1.setTo(
+      //   this.me.m_userData.x,
+      //   this.me.m_userData.y,
+      //   this.pointer.x,
+      //   this.pointer.y
+      // );
+      const points = this.line1.getPoints(10);
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+
+        this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
+      }
     }
   }
 }
