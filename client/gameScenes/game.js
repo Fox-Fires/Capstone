@@ -1,20 +1,27 @@
-import planck from 'planck-js';
-import firebase from 'firebase/app';
-import 'firebase/database';
-import firebaseConfig from '../../Firebase/firebaseConfig';
+import planck from "planck-js";
+import firebase from "firebase/app";
+import "firebase/database";
+import firebaseConfig from "../../Firebase/firebaseConfig";
+import axios from "axios";
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: 'Game',
+      key: "Game",
     });
     this.destroy = this.destroy.bind(this);
     this.me = null;
     this.clicked = false;
+    this.line1;
+    this.graphics;
+    this.pointer;
+    // this.graphics = this.add.graphics({
+    //   fillStyle: { color: 0xff0000 },
+    // });
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
-    this.playerNumber = Math.random().toString().split('.')[1];
+    this.playerNumber = Math.random().toString().split(".")[1];
     this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
@@ -24,20 +31,35 @@ export default class Game extends Phaser.Scene {
   destroy(body) {
     this.world.destroyBody(body);
   }
-
+  // preload() {
+  //   this.load.image("Gerg", "./assets/Gerg.png");
+  // }
+  async preload() {
+    try {
+      this.load.image("Gerg", "./assets/Gerg.png");
+      const loadedData = JSON.parse(localStorage.getItem("User-form"));
+      const data = await axios.post(
+        "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
+        { userName: loadedData.name }
+      );
+      console.log("preload Data:", data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   trackAndRenderPlayers() {
     let user = {};
     const thisPlayerRef = firebase
       .database()
       .ref(`testGame/${this.playerNumber}`);
     thisPlayerRef.onDisconnect().set({});
-    const rootRef = firebase.database().ref('testGame');
+    const rootRef = firebase.database().ref("testGame");
 
-    const urlRef = rootRef.child('/');
-    urlRef.on('value', (snapshot) => {
+    const urlRef = rootRef.child("/");
+    urlRef.on("value", (snapshot) => {
       user = snapshot.val();
     });
-    urlRef.once('value', (snapshot) => {
+    urlRef.once("value", (snapshot) => {
       this.makePlayers(snapshot.val());
 
       // console.log(user);
@@ -61,7 +83,7 @@ export default class Game extends Phaser.Scene {
     // Box2D works with meters. We need to convert meters to pixels.
     // let's say 30 pixels = 1 meter.
     this.worldScale = 30;
-
+    // this.add.image(0, 0, "Gerg");
     // world gravity, as a Vec2 object. It's just a x, y vector
     let gravity = planck.Vec2(0, 1);
     // this is how we create a Box2D world
@@ -71,16 +93,16 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: 'ball',
+      userData: "ball",
     };
     const railFixDef = {
       friction: 0.1,
       restitution: 0.09,
       isSensor: true,
-      userData: 'rail',
+      userData: "rail",
     };
 
-    this.world.on('post-solve', (contact) => {
+    this.world.on("post-solve", (contact) => {
       const fixtureA = contact.getFixtureA();
       const fixtureB = contact.getFixtureB();
       // if (fixtureB) {
@@ -120,10 +142,11 @@ export default class Game extends Phaser.Scene {
     // const ball2 = this.createBall(400, 100, 15);
     // const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
-    // const ball1 = this.createBall(200, 60, 15);
-    // const ball3 = this.createBall(600, 190, 15);
-    // this.createBall(615, 190, 15);
-    this.me = this.createBall(400, 100, 15);
+    const ball1 = this.createBall(200, 60, 15);
+    const ball3 = this.createBall(600, 190, 15);
+    const gerg = this.createGerg(120, 120, 15);
+    this.createBall(615, 190, 15);
+    this.me = gerg;
     // console.log(this.me.m_userData);
     // console.log(this.me.m_userData.x);
     // console.log(this.me.m_userData.y);
@@ -134,25 +157,52 @@ export default class Game extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.A,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
+    this.graphics = this.add.graphics({
+      fillStyle: { color: 0xff0000 },
+    });
     this.input.on(
-      'pointerdown',
+      "pointerdown",
       function (pointer) {
-        let difx = this.me.m_userData.x - pointer.x;
-        let dify = this.me.m_userData.y - pointer.y;
+        let difx = 400 - pointer.x;
+        let dify = 300 - pointer.y;
 
         // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15) {
           this.clicked = true;
+          // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
+          // console.log("point xy", pointer.x, pointer.y);
+          this.line1 = new Phaser.Geom.Line(
+            this.me.m_userData.x,
+            this.me.m_userData.y,
+            this.me.m_userData.x - difx,
+            this.me.m_userData.y - dify
+          );
+          const points = this.line1.getPoints(10);
+          for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+
+            this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
+          }
         }
         // console.log(this.clicked);
       },
       this
     );
     this.input.on(
-      'pointerup',
+      "pointermove",
       function (pointer) {
-        let difx = this.me.m_userData.x - pointer.x;
-        let dify = this.me.m_userData.y - pointer.y;
+        if (this.clicked) {
+          this.pointer = { x: pointer.x, y: pointer.y };
+          // console.log(" while clicked pointer", this.pointer);
+        }
+      },
+      this
+    );
+    this.input.on(
+      "pointerup",
+      function (pointer) {
+        let difx = 400 - pointer.x;
+        let dify = 300 - pointer.y;
         // console.log("up", difx, dify);
         if (this.clicked) {
           this.me.applyLinearImpulse(
@@ -165,14 +215,20 @@ export default class Game extends Phaser.Scene {
       },
       this
     );
-    // this.cameras.main.startFollow(this.me.getUserData());
-    // this.input.on('pointerdown', function (pointer) {
-    //   let vec = this.me.applyLinearImpulseToCenter(planck.Vec2(-pointer.x, -pointer.y), true)
-    // }, this)
-    // this.input.setDraggable(this.me.userData);
-    // console.log(this.me);
-
-    console.log(this.world);
+    this.cameras.main.startFollow(this.me.getUserData());
+    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
+      if (this.cameras.main.zoom <= 0.6) {
+        if (deltaY < 0) {
+          this.cameras.main.zoom -= deltaY * 0.001;
+        }
+      } else if (this.cameras.main.zoom >= 1.6) {
+        if (deltaY > 0) {
+          this.cameras.main.zoom -= deltaY * 0.001;
+        }
+      } else {
+        this.cameras.main.zoom -= deltaY * 0.001;
+      }
+    });
   }
 
   createBall(posX, posY, radius) {
@@ -180,7 +236,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: 'ball',
+      userData: "ball",
     };
     const ballBodyDef = {
       linearDamping: 1.5,
@@ -211,7 +267,43 @@ export default class Game extends Phaser.Scene {
     circle.setUserData(userData);
     return circle;
   }
+  createGerg(posX, posY, radius) {
+    const ballFixDef = {
+      friction: 0.1,
+      restitution: 0.9,
+      density: 1,
+      userData: "ball",
+    };
+    const ballBodyDef = {
+      linearDamping: 1.5,
+      angularDamping: 10,
+    };
 
+    let circle = this.world.createDynamicBody(ballBodyDef);
+    // circle.setDynamic();
+    circle.createFixture(planck.Circle(radius / this.worldScale), ballFixDef);
+    circle.setPosition(
+      planck.Vec2(posX / this.worldScale, posY / this.worldScale)
+    );
+    circle.setMassData({
+      mass: 1,
+      center: planck.Vec2(),
+
+      // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
+      I: 0.1,
+    });
+    let userData = this.add.image(posX, posY, "Gerg");
+    // var color = new Phaser.Display.Color();
+    // color.random();
+    // color.brighten(50).saturate(100);
+    // let userData = this.add.graphics();
+    // userData.fillStyle(color.color, 1);
+    // userData.fillCircle(0, 0, radius);
+
+    // a body can have anything in its user data, normally it's used to store its sprite
+    circle.setUserData(userData);
+    return circle;
+  }
   // here we go with some Box2D stuff
   // arguments: x, y coordinates of the center, with and height of the box, in pixels
   // we'll conver pixels to meters inside the method
@@ -226,7 +318,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.09,
       isSensor: sensor,
-      userData: 'rail',
+      userData: "rail",
     };
     // a body can have one or more fixtures. This is how we create a box fixture inside a body
     box.createFixture(
@@ -327,24 +419,43 @@ export default class Game extends Phaser.Scene {
       );
       // console.log("hell yea");
     }
-    if (
-      Math.round(this.me.m_userData.x) != this.previousX ||
-      Math.round(this.me.m_userData.y) != this.previousY
-    ) {
-      firebase
-        .database()
-        .ref(`testGame/${this.playerNumber}`)
-        .set({
-          x: Math.round(this.me.m_userData.x),
-          y: Math.round(this.me.m_userData.y),
-        });
-      this.previousX = Math.round(this.me.m_userData.x);
-      this.previousY = Math.round(this.me.m_userData.y);
-      // for (let key in this.allPlayers) {
-      //   if (key !== theNum) {
-      //     console.log("allPlayers", this.allPlayers);
-      //   }
-      // }
+    this.graphics.clear();
+    if (this.clicked) {
+      if (this.pointer) {
+        let difx = 400 - this.pointer.x;
+        let dify = 300 - this.pointer.y;
+        this.line1.setTo(
+          this.me.m_userData.x,
+          this.me.m_userData.y,
+          this.me.m_userData.x - difx,
+          this.me.m_userData.y - dify
+        );
+      }
+      const points = this.line1.getPoints(10);
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+
+        this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
+      }
+      if (
+        Math.round(this.me.m_userData.x) != this.previousX ||
+        Math.round(this.me.m_userData.y) != this.previousY
+      ) {
+        firebase
+          .database()
+          .ref(`testGame/${this.playerNumber}`)
+          .set({
+            x: Math.round(this.me.m_userData.x),
+            y: Math.round(this.me.m_userData.y),
+          });
+        this.previousX = Math.round(this.me.m_userData.x);
+        this.previousY = Math.round(this.me.m_userData.y);
+        // for (let key in this.allPlayers) {
+        //   if (key !== theNum) {
+        //     console.log("allPlayers", this.allPlayers);
+        //   }
+        // }
+      }
     }
   }
 }
