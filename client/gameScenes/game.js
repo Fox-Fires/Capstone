@@ -2,6 +2,7 @@ import planck from 'planck-js';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import firebaseConfig from '../../Firebase/firebaseConfig';
+import axios from 'axios'
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -24,7 +25,15 @@ export default class Game extends Phaser.Scene {
   destroy(body) {
     this.world.destroyBody(body);
   }
-
+  async preload(){
+    try{
+      const loadedData = JSON.parse(localStorage.getItem('User-form'));
+      const data = await axios.post('http://localhost:5001/capstonegolf-67769/us-central1/api/game',{userName:loadedData.name})
+      console.log("preload Data:",data);
+    }catch(err){
+      console.error(err);
+    }
+  }
   trackAndRenderPlayers() {
     let user = {};
     const thisPlayerRef = firebase

@@ -11,8 +11,8 @@ const {
 } = require('./constants');
 const { db } = require('./admin');
 
-// class Game {
-class Game extends planck.World {
+// class Physics {
+class Physics extends planck.World {
   constructor(config) {
     super(config || {});
     this.shouldWriteData = true;
@@ -74,12 +74,12 @@ class Game extends planck.World {
     return user;
   }
 
-  removeUser(user) {
+  removeUser(userId) {
     // remove user form engine
+    const user = this.users[userId]
     this.destroyBody(user);
 
     // remove user from this.users
-    const userId = user.getUserData().id;
     delete this.users[userId];
 
     // remove user reference in db
@@ -116,7 +116,7 @@ class Game extends planck.World {
 
   writeUser(user) {
     // pull out relevant information
-    const pos = user.getPosition().mul(worldScale);
+    const pos = user.getPosition()
     const gameId = this.gameId;
     const userData = user.getUserData();
     const userId = userData.id;
@@ -128,8 +128,8 @@ class Game extends planck.World {
     // only update if user has moved since last update
     if (pos.x !== prevX || pos.y !== prevY || bodyAngle !== prevAng) {
       db.ref(`games/${gameId}/users/${userId}`).set({
-        x: pos.x,
-        y: pos.y,
+        x: pos.x*worldScale,
+        y: pos.y*worldScale,
         bodyAngle: bodyAngle,
       });
 
@@ -158,4 +158,4 @@ class Game extends planck.World {
   }
 }
 
-exports.Game = Game;
+exports.Physics = Physics;

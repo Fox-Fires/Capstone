@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const { Game } = require('./physics');
+const { Physics } = require('./physics');
 const planck = require('planck-js');
 
 // admin.initializeApp();
@@ -8,6 +8,7 @@ const planck = require('planck-js');
 const express = require('express');
 const app = express();
 
+let game=undefined;
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
@@ -52,5 +53,22 @@ app.post('/player', (req, res) => {
       console.error(err);
     });
 });
+
+app.post('/game',(req,res)=>{
+  if(!game) {
+    game = new Physics();
+    game.startGame();
+  }
+  const newUser = game.addUser(400,100,req.body.userName)
+  const userId = newUser.getUserData().id
+  const gameId = game.gameId
+  res.json({userId,gameId})
+})
+
+app.delete('/game',(req,res)=>{
+  const {userId,gameId} = req.body;
+  game.removeUser(userId);
+  res.sendStatus(200)
+})
 
 exports.api = functions.https.onRequest(app);
