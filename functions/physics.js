@@ -125,6 +125,19 @@ class Physics extends planck.World {
     const prevY = userData.prevY;
     const prevAng = userData.prevAng;
 
+    // Check for player move input
+    const currentMove = db.ref(`game/${gameId}/users/${userId}/move`)
+    // Apply move input
+    if(currentMove && !currentMove.waiting){
+      user.applyLinearImpulse(
+        planck.Vec2(currentMove.x,currentMove.y),
+        planck.Vec2(pos.x,pos.y),
+        true
+      )
+    }
+    //return input to zero
+    db.ref(`game/${gameId}/users/${userId}/move`).set({waiting:true})
+
     // only update if user has moved since last update
     if (pos.x !== prevX || pos.y !== prevY || bodyAngle !== prevAng) {
       db.ref(`games/${gameId}/users/${userId}`).set({

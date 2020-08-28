@@ -15,7 +15,8 @@ export default class Game extends Phaser.Scene {
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
-    this.playerNumber = Math.random().toString().split('.')[1];
+    this.playerNumber = null;
+    this.gameId = null;
     this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
@@ -28,18 +29,19 @@ export default class Game extends Phaser.Scene {
   async preload(){
     try{
       const loadedData = JSON.parse(localStorage.getItem('User-form'));
-      const data = await axios.post('http://localhost:5001/capstonegolf-67769/us-central1/api/game',{userName:loadedData.name})
-      console.log("preload Data:",data);
+      const {data} = await axios.post('http://localhost:5001/capstonegolf-67769/us-central1/api/game',{userName:loadedData.name})
+      this.playerNumber = data.userId;
+      this.gameId = data.gameId;
     }catch(err){
       console.error(err);
     }
   }
   trackAndRenderPlayers() {
     let user = {};
-    const thisPlayerRef = firebase
+    const allPlayersRef = firebase
       .database()
-      .ref(`testGame/${this.playerNumber}`);
-    thisPlayerRef.onDisconnect().set({});
+      .ref(`games/${this.gameId}/users`);
+    allPlayersRef.child(`${this.userId}`).onDisconnect().set({});
     const rootRef = firebase.database().ref('testGame');
 
     const urlRef = rootRef.child('/');
