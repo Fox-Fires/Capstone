@@ -21,7 +21,8 @@ export default class Game extends Phaser.Scene {
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
-    this.playerNumber = Math.random().toString().split(".")[1];
+    this.userId = null;
+    this.gameId = null
     this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
@@ -38,21 +39,18 @@ export default class Game extends Phaser.Scene {
     try {
       this.load.image("Gerg", "./assets/Gerg.png");
       const loadedData = JSON.parse(localStorage.getItem("User-form"));
-      const data = await axios.post(
+      const {data} = await axios.post(
         "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
         { userName: loadedData.name }
       );
-      console.log("preload Data:", data);
+      this.userId = data.userId;
+      this.gameId = data.gameId;
     } catch (err) {
       console.error(err);
     }
   }
   trackAndRenderPlayers() {
     let user = {};
-    const thisPlayerRef = firebase
-      .database()
-      .ref(`testGame/${this.playerNumber}`);
-    thisPlayerRef.onDisconnect().set({});
     const rootRef = firebase.database().ref("testGame");
 
     const urlRef = rootRef.child("/");
@@ -150,13 +148,8 @@ export default class Game extends Phaser.Scene {
     // console.log(this.me.m_userData);
     // console.log(this.me.m_userData.x);
     // console.log(this.me.m_userData.y);
-    // Testing Movements
-    this.inputKeys = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D,
-    });
+
+    //Pointer graphic
     this.graphics = this.add.graphics({
       fillStyle: { color: 0xff0000 },
     });
@@ -210,6 +203,13 @@ export default class Game extends Phaser.Scene {
             planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
             true
           );
+          firebase
+            .database()
+            .ref(`games/${this.gameId}/users/${this.userId}/move`)
+            .set({
+              vec2x: difx/2,
+              vec2y: dify/2
+            })
         }
         this.clicked = false;
       },
@@ -363,6 +363,14 @@ export default class Game extends Phaser.Scene {
   // }
 
   update() {
+    // if(this.gameId!==null){
+    //   const allPlayersRef = firebase
+    //   .database()
+    //   .ref(`games/${this.gameId}/users`);
+    //   allPlayersRef.onDisconnect().set({});
+
+    //   console.log("allplayers:",allPlayersRef)
+    // }
     // advance the simulation by 1/20 seconds
     this.world.step(1 / 60);
 
@@ -385,40 +393,7 @@ export default class Game extends Phaser.Scene {
       userData.y = bodyPosition.y * this.worldScale;
       userData.rotation = bodyAngle;
     }
-    if (this.inputKeys.up.isDown) {
-      // this.me.applyForceToCenter(planck.Vec2(0, -60), true);
-      // console.log(this.me.m_userData.y);
-      this.me.applyLinearImpulse(
-        planck.Vec2(0, -5),
-        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
-        true
-      );
-    }
-    if (this.inputKeys.left.isDown) {
-      // this.me.applyForceToCenter(planck.Vec2(-30, 0), true);
-      this.me.applyLinearImpulse(
-        planck.Vec2(-5, 0),
-        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
-        true
-      );
-    }
-    if (this.inputKeys.right.isDown) {
-      // this.me.applyForceToCenter(planck.Vec2(30, 0), true);
-      this.me.applyLinearImpulse(
-        planck.Vec2(5, 0),
-        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
-        true
-      );
-    }
-    if (this.inputKeys.down.isDown) {
-      // this.me.applyForceToCenter(planck.Vec2(0, 30), true);
-      this.me.applyLinearImpulse(
-        planck.Vec2(0, 5),
-        planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
-        true
-      );
-      // console.log("hell yea");
-    }
+    //Graphics for dotted line indicator
     this.graphics.clear();
     if (this.clicked) {
       if (this.pointer) {
@@ -437,6 +412,7 @@ export default class Game extends Phaser.Scene {
 
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
+    }
       if (
         Math.round(this.me.m_userData.x) != this.previousX ||
         Math.round(this.me.m_userData.y) != this.previousY
@@ -456,6 +432,5 @@ export default class Game extends Phaser.Scene {
         //   }
         // }
       }
-    }
   }
 }
