@@ -12,8 +12,8 @@ export default class Game extends Phaser.Scene {
     this.me = null;
     this.clicked = false;
     firebase.initializeApp(firebaseConfig);
-    this.previousX = 0;
-    this.previousY = 0;
+    this.previousX = 400;
+    this.previousY = 100;
     this.playerNumber = Math.random().toString().split(".")[1];
     this.database = firebase.database();
     this.allPlayers = {};
@@ -43,11 +43,9 @@ export default class Game extends Phaser.Scene {
   //   }
   // }
   trackAndRenderPlayers() {
-    const thisPlayerRef = firebase
-      .database()
-      .ref(`testGame/${this.playerNumber}`);
+    const thisPlayerRef = firebase.database().ref(`OMG/${this.playerNumber}`);
     thisPlayerRef.onDisconnect().set({});
-    const rootRef = firebase.database().ref("testGame");
+    const rootRef = firebase.database().ref("OMG");
 
     const urlRef = rootRef.child("/");
     urlRef.on("value", (snapshot) => {
@@ -68,12 +66,7 @@ export default class Game extends Phaser.Scene {
   makePlayers(data) {
     for (let key in data) {
       if (key !== this.playerNumber) {
-        this.allPlayersObj = this.createBall(
-          data[key].x,
-          data[key].y,
-          15,
-          data[key]
-        );
+        this.createBall(data[key].x, data[key].y, 15, data[key].key);
       }
     }
   }
@@ -195,7 +188,7 @@ export default class Game extends Phaser.Scene {
     // console.log(this.me);
   }
 
-  createBall(posX, posY, radius, id) {
+  createBall(posX = 400, posY = 100, radius = 15, id = this.playerNumber) {
     const ballFixDef = {
       friction: 0.1,
       restitution: 0.9,
@@ -227,6 +220,7 @@ export default class Game extends Phaser.Scene {
     userData.fillStyle(color.color, 1);
     userData.fillCircle(0, 0, radius);
     userData.name = id;
+
     // a body can have anything in its user data, normally it's used to store its sprite
     circle.setUserData(userData);
     return circle;
@@ -307,11 +301,29 @@ export default class Game extends Phaser.Scene {
 
       // get body user data, the graphics object
       let userData = b.getUserData();
+      // console.log(b);
+      // if (parseInt(b.m_userData.name.id) != this.playerNumber) {
+      //   continue;
+      // }
+      // /* else*/ if (
+      //   b.m_userData.x != b.m_userData.name.x ||
+      //   b.m_userData.y != b.m_userData.name.y)
 
       // adjust graphic object position and rotation
       userData.x = bodyPosition.x * this.worldScale;
       userData.y = bodyPosition.y * this.worldScale;
       userData.rotation = bodyAngle;
+      // {
+      //   firebase
+      //     .database()
+      //     .ref(`OMG/${b.m_userData.name}`)
+      //     .update({
+      //       x: Math.round(b.m_userData.name.x),
+      //       y: Math.round(b.m_userData.name.y),
+      //     });
+      //   //   b.m_userData.name.x = Math.round(b.m_userData.x);
+      //   //   b.m_userData.name.y = Math.round(b.m_userData.y);
+      // }
     }
     if (this.inputKeys.up.isDown) {
       // this.me.applyForceToCenter(planck.Vec2(0, -60), true);
@@ -353,34 +365,31 @@ export default class Game extends Phaser.Scene {
     ) {
       firebase
         .database()
-        .ref(`testGame/${this.playerNumber}`)
+        .ref(`OMG/${this.playerNumber}`)
         .set({
           x: Math.round(this.me.m_userData.x),
           y: Math.round(this.me.m_userData.y),
         });
       this.previousX = Math.round(this.me.m_userData.x);
       this.previousY = Math.round(this.me.m_userData.y);
-      for (let key in this.allPlayersObj) {
-        console.log("key:", key, "x:", this.allPlayers[key].x);
-        if (
-          Math.round(this.allPlayersTrack[key].m_userData.name[key].x) !=
-            this.previousAllPlayers[key].x ||
-          Math.round(this.allPlayersTrack[key].m_userData.name[key].y) !=
-            this.previousAllPlayers[key].y
-        ) {
-          firebase
-            .database()
-            .ref("testGame/" + key)
-            .set({
-              key: key,
-              x: Math.round(this.allPlayersObj[key].x),
-              y: Math.round(this.allPlayersObj[key].y),
-            });
-        }
-        this.previousAllPlayers[key].x = Math.round(this.allPlayersObj[key].x);
-        this.previousAllPlayers[key].y = Math.round(this.allPlayersObj[key].y);
-      }
-      console.log(this.allPlayersObj);
+      // for (let key in this.allPlayersObj) {
+      // if (
+      //   Math.round(this.allPlayersObj[key].m_userData.name[key].x) !=
+      //     this.previousAllPlayers[key].x ||
+      //   Math.round(this.allPlayersObj.m_userData.name[key].y) !=
+      //     this.previousAllPlayers[key].y)
+      //     firebase
+      //       .database()
+      //       .ref("testGame/" + key)
+      //       .set({
+      //         key: key,
+      //         x: Math.round(this.allPlayersObj[key].x),
+      //         y: Math.round(this.allPlayersObj[key].y),
+      //       });
+      //   }
+      //   this.previousAllPlayers[key].x = Math.round(this.allPlayersObj[key].x);
+      //   this.previousAllPlayers[key].y = Math.round(this.allPlayersObj[key].y);
+      // }
     }
   }
 }
