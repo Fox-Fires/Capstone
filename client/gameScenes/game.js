@@ -1,4 +1,8 @@
 import planck from "planck-js";
+import firebase from "firebase/app";
+import "firebase/database";
+import firebaseConfig from "../../Firebase/firebaseConfig";
+import axios from "axios";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -14,15 +18,68 @@ export default class Game extends Phaser.Scene {
     // this.graphics = this.add.graphics({
     //   fillStyle: { color: 0xff0000 },
     // });
+    firebase.initializeApp(firebaseConfig);
+    this.previousX = 0;
+    this.previousY = 0;
+    this.playerNumber = Math.random().toString().split(".")[1];
+    this.database = firebase.database();
+    this.allPlayers = {};
+    this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
+    this.createBall = this.createBall.bind(this);
+    this.makePlayers = this.makePlayers.bind(this);
   }
   destroy(body) {
     this.world.destroyBody(body);
   }
-  preload() {
-    this.load.image("Gerg", "./assets/Gerg.png");
-    // this.load.image("King of Club Card", "src/assets/King of Clubs.png");
+  // preload() {
+  //   this.load.image("Gerg", "./assets/Gerg.png");
+  // }
+  async preload() {
+    try {
+      this.load.image("Gerg", "./assets/Gerg.png");
+      const loadedData = JSON.parse(localStorage.getItem("User-form"));
+      const data = await axios.post(
+        "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
+        { userName: loadedData.name }
+      );
+      console.log("preload Data:", data);
+    } catch (err) {
+      console.error(err);
+    }
   }
+  trackAndRenderPlayers() {
+    let user = {};
+    const thisPlayerRef = firebase
+      .database()
+      .ref(`testGame/${this.playerNumber}`);
+    thisPlayerRef.onDisconnect().set({});
+    const rootRef = firebase.database().ref("testGame");
+
+    const urlRef = rootRef.child("/");
+    urlRef.on("value", (snapshot) => {
+      user = snapshot.val();
+    });
+    urlRef.once("value", (snapshot) => {
+      this.makePlayers(snapshot.val());
+
+      // console.log(user);
+      // for (let key in user) {
+      //   if (key !== theNum) {
+      //     console.log(user);
+      //   }
+      // }
+    });
+  }
+  makePlayers(data) {
+    for (let key in data) {
+      if (key !== this.playerNumber) {
+        this.createBall(data[key].x, data[key].y, 15);
+      }
+    }
+  }
+
   create() {
+    this.trackAndRenderPlayers();
     // Box2D works with meters. We need to convert meters to pixels.
     // let's say 30 pixels = 1 meter.
     this.worldScale = 30;
@@ -83,7 +140,7 @@ export default class Game extends Phaser.Scene {
     const wallLeft = this.createBox(20, 600 / 2, 40, 600, false, false);
     const wallRight = this.createBox(800 - 20, 600 / 2, 40, 600, false, false);
     // const ball2 = this.createBall(400, 100, 15);
-    const ball = this.createBall(400, 250, 15);
+    // const ball = this.createBall(400, 250, 15);
     // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
     const ball1 = this.createBall(200, 60, 15);
     const ball3 = this.createBall(600, 190, 15);
@@ -173,6 +230,7 @@ export default class Game extends Phaser.Scene {
       }
     });
   }
+
   createBall(posX, posY, radius) {
     const ballFixDef = {
       friction: 0.1,
@@ -294,6 +352,16 @@ export default class Game extends Phaser.Scene {
     box.setUserData(userData);
   }
 
+  // updatePlayerPositions() {
+  //   this.getPlayers();
+  //   console.log("🪀Work:", this.allPlayers);
+  //   Object.keys(this.allPlayers).forEach((characterKey) => {
+  //     if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
+  //       const incomingData = characterKey;
+  //     }
+  //   });
+  // }
+
   update() {
     // advance the simulation by 1/20 seconds
     this.world.step(1 / 60);
@@ -352,38 +420,7 @@ export default class Game extends Phaser.Scene {
       // console.log("hell yea");
     }
     this.graphics.clear();
-    // this.input.on(
-    //   "pointermove",
-    //   function (pointer) {
-    //     if (this.clicked) {
-    //       console.log("i clicked");
-    //       // Phaser.Geom.Line.RotateAroundPoint(
-    //       //   this.line1,
-    //       //   { x: this.me.m_userData.x, y: this.me.m_userData.y },
-    //       //   0.02
-    //       // );
-    //       this.line1.setTo(
-    //         this.me.m_userData.x,
-    //         this.me.m_userData.y,
-    //         pointer.x,
-    //         pointer.y
-    //       );
-    //       const points = this.line1.getPoints(10);
-    //       for (let i = 0; i < points.length; i++) {
-    //         const p = points[i];
-
-    //         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
-    //       }
-    //     }
-    //   },
-    //   this
-    // );
     if (this.clicked) {
-      // Phaser.Geom.Line.RotateAroundPoint(
-      //   this.line1,
-      //   { x: this.me.m_userData.x, y: this.me.m_userData.y },
-      //   0.02
-      // );
       if (this.pointer) {
         let difx = 400 - this.pointer.x;
         let dify = 300 - this.pointer.y;
@@ -394,18 +431,30 @@ export default class Game extends Phaser.Scene {
           this.me.m_userData.y - dify
         );
       }
-      // console.log("update pointer yasdf", this.pointer);
-      // this.line1.setTo(
-      //   this.me.m_userData.x,
-      //   this.me.m_userData.y,
-      //   this.pointer.x,
-      //   this.pointer.y
-      // );
       const points = this.line1.getPoints(10);
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
+      }
+      if (
+        Math.round(this.me.m_userData.x) != this.previousX ||
+        Math.round(this.me.m_userData.y) != this.previousY
+      ) {
+        firebase
+          .database()
+          .ref(`testGame/${this.playerNumber}`)
+          .set({
+            x: Math.round(this.me.m_userData.x),
+            y: Math.round(this.me.m_userData.y),
+          });
+        this.previousX = Math.round(this.me.m_userData.x);
+        this.previousY = Math.round(this.me.m_userData.y);
+        // for (let key in this.allPlayers) {
+        //   if (key !== theNum) {
+        //     console.log("allPlayers", this.allPlayers);
+        //   }
+        // }
       }
     }
   }

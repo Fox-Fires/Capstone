@@ -14,7 +14,9 @@
   "main": "index.js",
   "dependencies": {
     "firebase-admin": "^8.10.0",
-    "firebase-functions": "^3.6.1"
+    "firebase-functions": "^3.6.1",
+    "phaser": "^3.24.1",
+    "planck-js": "^0.3.22"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.0"
