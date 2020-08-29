@@ -136,8 +136,17 @@ class Physics extends planck.World {
           planck.Vec2(pos.x*worldScale, pos.y*worldScale),
           true
         )
-        db.ref(`games/${gameId}/users/${userId}/move`).set({waiting:true})
+        db.ref(`games/${gameId}/users/${userId}/move`).set({what:"the",waiting:true},
+          function(error){
+            if(error){
+
+            }else{
+              console.log("Applied Move")
+            }
+          }
+        )
       }
+
     })
     // if(userMove.waiting==="false"){
     //   console.log("where is this logging to?:",userMove.waiting,userMove.vec2x,userMove.vec2y)
