@@ -87,7 +87,25 @@ class Physics extends planck.World {
     db.ref(`games/${this.gameId}/users/${userId}`).set({});
   }
 
-  loadLevel(barriers) {}
+  loadLevel(barriers) {
+    // clear all barriers
+    this.clearLevel();
+
+    // add in new barriers
+    barriers.forEach(({ x, y, w, h }) => {
+      this.addBarrier(x, y, w, h);
+    });
+  }
+
+  clearLevel() {
+    // remove barriers from physics engine
+    this.barriers.forEach((barrier) => {
+      this.destroyBody(barrier);
+    });
+
+    // clear list of barriers
+    this.barriers = [];
+  }
 
   addBarrier(x, y, w, h) {
     // add barrier to physics world
@@ -103,6 +121,9 @@ class Physics extends planck.World {
     barrier.setUserData({
       type: 'barrier',
     });
+
+    // add barrier to collection
+    this.barriers.push(barrier);
 
     return barrier;
   }
@@ -190,15 +211,15 @@ class Physics extends planck.World {
         }
       }
     );
-    if (userMove.waiting === 'false') {
-      console.log(
-        'where is this logging to?:',
-        userMove.waiting,
-        userMove.vec2x,
-        userMove.vec2y
-      );
-      userMove.set({ waiting: true });
-    }
+    // if (userMove.waiting === 'false') {
+    //   console.log(
+    //     'where is this logging to?:',
+    //     userMove.waiting,
+    //     userMove.vec2x,
+    //     userMove.vec2y
+    //   );
+    //   userMove.set({ waiting: true });
+    // }
   }
 
   update() {
