@@ -222,6 +222,17 @@ class Physics extends planck.World {
     // }
   }
 
+  puttUser2(userId, x, y) {
+    const user = this.users[userId];
+    const pos = user.getPosition();
+
+    user.applyLinearImpulse(
+      planck.Vec2(x, y),
+      planck.Vec2(pos.x * worldScale, pos.y * worldScale),
+      true
+    );
+  }
+
   update() {
     // move physics engine forward (units: seconds)
     this.step(dt / 1000);

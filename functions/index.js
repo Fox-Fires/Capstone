@@ -76,4 +76,13 @@ app.delete('/game', (req, res) => {
   res.sendStatus(200);
 });
 
+app.put('/userId', (req, res) => {
+  const userId = req.param.userId;
+  const { x, y } = req.body;
+  if (game) {
+    game.puttUser2(userId, x, y);
+    res.sendStatus(200);
+  }
+});
+
 exports.api = functions.https.onRequest(app);
