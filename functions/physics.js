@@ -125,6 +125,25 @@ class Physics extends planck.World {
     const prevY = userData.prevY;
     const prevAng = userData.prevAng;
 
+    //Look for move on user, and apply move
+    db.ref(`games/${gameId}/users/${userId}/move`)
+    .once("value",(snapshot)=>{
+      const userMove = snapshot.val();
+      if(userMove && userMove.waiting === false){
+        console.log("sending move:",userMove.vec2x,userMove.vec2y,"to:",pos.x*worldScale,pos.y*worldScale)
+        user.applyLinearImpulse(
+          planck.Vec2(userMove.vec2x, userMove.vec2y),
+          planck.Vec2(pos.x*worldScale, pos.y*worldScale),
+          true
+        )
+        db.ref(`games/${gameId}/users/${userId}/move`).set({waiting:true})
+      }
+    })
+    // if(userMove.waiting==="false"){
+    //   console.log("where is this logging to?:",userMove.waiting,userMove.vec2x,userMove.vec2y)
+    //   userMove.set({waiting:true})
+    // }
+
     // only update if user has moved since last update
     if (pos.x !== prevX || pos.y !== prevY || bodyAngle !== prevAng) {
       db.ref(`games/${gameId}/users/${userId}`).set({
@@ -135,7 +154,7 @@ class Physics extends planck.World {
 
       // update prev x and y
       user.setUserData({
-        ...user.getUserData(),
+        ...userData,
         prevX: pos.x,
         prevY: pos.y,
         prevAng: bodyAngle,

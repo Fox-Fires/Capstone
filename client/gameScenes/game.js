@@ -203,12 +203,15 @@ export default class Game extends Phaser.Scene {
             planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
             true
           );
+          //Attach move to user, and send to database
+          if(this.gameId !==null && this.userId !==null)
           firebase
             .database()
             .ref(`games/${this.gameId}/users/${this.userId}/move`)
             .set({
               vec2x: difx/2,
-              vec2y: dify/2
+              vec2y: dify/2,
+              waiting: false
             })
         }
         this.clicked = false;
