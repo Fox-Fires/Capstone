@@ -76,13 +76,23 @@ app.delete('/game', (req, res) => {
   res.sendStatus(200);
 });
 
-app.put('/userId', (req, res) => {
-  const userId = req.param.userId;
+app.put('/:userId', (req, res) => {
+  const userId = req.params.userId;
   const { x, y } = req.body;
+
   if (game) {
     game.puttUser2(userId, x, y);
     res.sendStatus(200);
+  } else {
+    res.sendStatus(400);
   }
+});
+
+exports.putt = functions.https.onCall((data, context) => {
+  // extract data
+  const { userId, x, y } = data;
+  // putt ball
+  game.puttUser2(userId, x, y);
 });
 
 exports.api = functions.https.onRequest(app);

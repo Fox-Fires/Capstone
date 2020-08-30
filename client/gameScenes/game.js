@@ -1,13 +1,13 @@
-import planck from "planck-js";
-import firebase from "firebase/app";
-import "firebase/database";
-import firebaseConfig from "../../Firebase/firebaseConfig";
-import axios from "axios";
+import planck from 'planck-js';
+import firebase from 'firebase/app';
+import 'firebase/database';
+import firebaseConfig from '../../Firebase/firebaseConfig';
+import axios from 'axios';
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: "Game",
+      key: 'Game',
     });
     this.destroy = this.destroy.bind(this);
     this.me = null;
@@ -22,7 +22,7 @@ export default class Game extends Phaser.Scene {
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
-    this.gameId = null
+    this.gameId = null;
     this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
@@ -37,10 +37,12 @@ export default class Game extends Phaser.Scene {
   // }
   async preload() {
     try {
-      this.load.image("Gerg", "./assets/Gerg.png");
-      const loadedData = JSON.parse(localStorage.getItem("User-form"));
-      const {data} = await axios.post(
-        "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
+      this.load.image('Gerg', './assets/Gerg.png');
+      const loadedData = JSON.parse(localStorage.getItem('User-form'));
+      const {
+        data,
+      } = await axios.post(
+        'http://localhost:5001/capstonegolf-67769/us-central1/api/game',
         { userName: loadedData.name }
       );
       this.userId = data.userId;
@@ -51,13 +53,13 @@ export default class Game extends Phaser.Scene {
   }
   trackAndRenderPlayers() {
     let user = {};
-    const rootRef = firebase.database().ref("testGame");
+    const rootRef = firebase.database().ref('testGame');
 
-    const urlRef = rootRef.child("/");
-    urlRef.on("value", (snapshot) => {
+    const urlRef = rootRef.child('/');
+    urlRef.on('value', (snapshot) => {
       user = snapshot.val();
     });
-    urlRef.once("value", (snapshot) => {
+    urlRef.once('value', (snapshot) => {
       this.makePlayers(snapshot.val());
 
       // console.log(user);
@@ -91,16 +93,16 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: "ball",
+      userData: 'ball',
     };
     const railFixDef = {
       friction: 0.1,
       restitution: 0.09,
       isSensor: true,
-      userData: "rail",
+      userData: 'rail',
     };
 
-    this.world.on("post-solve", (contact) => {
+    this.world.on('post-solve', (contact) => {
       const fixtureA = contact.getFixtureA();
       const fixtureB = contact.getFixtureB();
       // if (fixtureB) {
@@ -154,7 +156,7 @@ export default class Game extends Phaser.Scene {
       fillStyle: { color: 0xff0000 },
     });
     this.input.on(
-      "pointerdown",
+      'pointerdown',
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
@@ -182,7 +184,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointermove",
+      'pointermove',
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
@@ -192,7 +194,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointerup",
+      'pointerup',
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
@@ -204,22 +206,26 @@ export default class Game extends Phaser.Scene {
             true
           );
           //Attach move to user, and send to database
-          if(this.gameId !==null && this.userId !==null)
-          firebase
-            .database()
-            .ref(`games/${this.gameId}/users/${this.userId}/move`)
-            .set({
-              vec2x: difx/2,
-              vec2y: dify/2,
-              waiting: false
-            })
+          // if(this.gameId !==null && this.userId !==null)
+          // firebase
+          //   .database()
+          //   .ref(`games/${this.gameId}/users/${this.userId}/move`)
+          //   .set({
+          //     vec2x: difx/2,
+          //     vec2y: dify/2,
+          //     waiting: false
+          //   })
+          axios.put(
+            `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
+            { x: difx / 2, y: dify / 2 }
+          );
         }
         this.clicked = false;
       },
       this
     );
     this.cameras.main.startFollow(this.me.getUserData());
-    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
+    this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
@@ -239,7 +245,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: "ball",
+      userData: 'ball',
     };
     const ballBodyDef = {
       linearDamping: 1.5,
@@ -275,7 +281,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.9,
       density: 1,
-      userData: "ball",
+      userData: 'ball',
     };
     const ballBodyDef = {
       linearDamping: 1.5,
@@ -295,7 +301,7 @@ export default class Game extends Phaser.Scene {
       // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
       I: 0.1,
     });
-    let userData = this.add.image(posX, posY, "Gerg");
+    let userData = this.add.image(posX, posY, 'Gerg');
     // var color = new Phaser.Display.Color();
     // color.random();
     // color.brighten(50).saturate(100);
@@ -321,7 +327,7 @@ export default class Game extends Phaser.Scene {
       friction: 0.1,
       restitution: 0.09,
       isSensor: sensor,
-      userData: "rail",
+      userData: 'rail',
     };
     // a body can have one or more fixtures. This is how we create a box fixture inside a body
     box.createFixture(
@@ -416,24 +422,24 @@ export default class Game extends Phaser.Scene {
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
     }
-      if (
-        Math.round(this.me.m_userData.x) != this.previousX ||
-        Math.round(this.me.m_userData.y) != this.previousY
-      ) {
-        firebase
-          .database()
-          .ref(`testGame/${this.playerNumber}`)
-          .set({
-            x: Math.round(this.me.m_userData.x),
-            y: Math.round(this.me.m_userData.y),
-          });
-        this.previousX = Math.round(this.me.m_userData.x);
-        this.previousY = Math.round(this.me.m_userData.y);
-        // for (let key in this.allPlayers) {
-        //   if (key !== theNum) {
-        //     console.log("allPlayers", this.allPlayers);
-        //   }
-        // }
-      }
+    if (
+      Math.round(this.me.m_userData.x) != this.previousX ||
+      Math.round(this.me.m_userData.y) != this.previousY
+    ) {
+      firebase
+        .database()
+        .ref(`testGame/${this.playerNumber}`)
+        .set({
+          x: Math.round(this.me.m_userData.x),
+          y: Math.round(this.me.m_userData.y),
+        });
+      this.previousX = Math.round(this.me.m_userData.x);
+      this.previousY = Math.round(this.me.m_userData.y);
+      // for (let key in this.allPlayers) {
+      //   if (key !== theNum) {
+      //     console.log("allPlayers", this.allPlayers);
+      //   }
+      // }
+    }
   }
 }
