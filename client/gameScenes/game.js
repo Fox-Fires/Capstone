@@ -1,7 +1,5 @@
 import planck from 'planck-js';
-import firebase from 'firebase/app';
-import 'firebase/database';
-import firebaseConfig from '../../Firebase/firebaseConfig';
+import { database } from '../../Firebase/main';
 import axios from 'axios';
 
 export default class Game extends Phaser.Scene {
@@ -9,7 +7,6 @@ export default class Game extends Phaser.Scene {
     super({
       key: 'Game',
     });
-    this.destroy = this.destroy.bind(this);
     this.me = null;
     this.clicked = false;
     this.line1;
@@ -18,7 +15,7 @@ export default class Game extends Phaser.Scene {
     // this.graphics = this.add.graphics({
     //   fillStyle: { color: 0xff0000 },
     // });
-    firebase.initializeApp(firebaseConfig);
+    // firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
@@ -29,12 +26,7 @@ export default class Game extends Phaser.Scene {
     this.createBall = this.createBall.bind(this);
     this.makePlayers = this.makePlayers.bind(this);
   }
-  destroy(body) {
-    this.world.destroyBody(body);
-  }
-  // preload() {
-  //   this.load.image("Gerg", "./assets/Gerg.png");
-  // }
+
   async preload() {
     try {
       this.load.image('Gerg', './assets/Gerg.png');
@@ -53,7 +45,9 @@ export default class Game extends Phaser.Scene {
   }
   trackAndRenderPlayers() {
     let user = {};
-    const rootRef = firebase.database().ref('testGame');
+    // const rootRef = firebase.database().ref('testGame');
+    console.log(database);
+    const rootRef = database.ref('testGame');
 
     const urlRef = rootRef.child('/');
     urlRef.on('value', (snapshot) => {
@@ -198,23 +192,12 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
-        // console.log("up", difx, dify);
         if (this.clicked) {
           this.me.applyLinearImpulse(
             planck.Vec2(difx / 2, dify / 2),
             planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
             true
           );
-          //Attach move to user, and send to database
-          // if(this.gameId !==null && this.userId !==null)
-          // firebase
-          //   .database()
-          //   .ref(`games/${this.gameId}/users/${this.userId}/move`)
-          //   .set({
-          //     vec2x: difx/2,
-          //     vec2y: dify/2,
-          //     waiting: false
-          //   })
           axios.put(
             `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
             { x: difx / 2, y: dify / 2 }
