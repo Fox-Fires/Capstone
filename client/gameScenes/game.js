@@ -15,9 +15,6 @@ export default class Game extends Phaser.Scene {
     this.line1;
     this.graphics;
     this.pointer;
-    // this.graphics = this.add.graphics({
-    //   fillStyle: { color: 0xff0000 },
-    // });
     firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
@@ -31,9 +28,6 @@ export default class Game extends Phaser.Scene {
   destroy(body) {
     this.world.destroyBody(body);
   }
-  // preload() {
-  //   this.load.image("Gerg", "./assets/Gerg.png");
-  // }
   async preload() {
     try {
       this.load.image("Gerg", "./assets/Gerg.png");
@@ -166,16 +160,17 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
 
-        // console.log("down, pointer, ball", pointer, this.me.m_userData);
-        if (Math.hypot(difx, dify) <= 15) {
+        console.log(this.cameras.main.zoom);
+        if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
+          console.log("divide line zoom scale");
           this.clicked = true;
           // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
           // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
             this.me.m_userData.x,
             this.me.m_userData.y,
-            this.me.m_userData.x - difx,
-            this.me.m_userData.y - dify
+            this.me.m_userData.x - difx / this.cameras.main.zoom,
+            this.me.m_userData.y - dify / this.cameras.main.zoom
           );
           const points = this.line1.getPoints(10);
           for (let i = 0; i < points.length; i++) {
@@ -193,7 +188,6 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
-          // console.log(" while clicked pointer", this.pointer);
         }
       },
       this
@@ -203,7 +197,6 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
-        // console.log("up", difx, dify);
         if (this.clicked) {
           this.me.applyLinearImpulse(
             planck.Vec2(difx / 2, dify / 2),
@@ -427,8 +420,8 @@ export default class Game extends Phaser.Scene {
         this.line1.setTo(
           this.me.m_userData.x,
           this.me.m_userData.y,
-          this.me.m_userData.x - difx,
-          this.me.m_userData.y - dify
+          this.me.m_userData.x - difx / this.cameras.main.zoom,
+          this.me.m_userData.y - dify / this.cameras.main.zoom
         );
       }
       const points = this.line1.getPoints(10);
@@ -437,25 +430,25 @@ export default class Game extends Phaser.Scene {
 
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
-      if (
-        Math.round(this.me.m_userData.x) != this.previousX ||
-        Math.round(this.me.m_userData.y) != this.previousY
-      ) {
-        firebase
-          .database()
-          .ref(`testGame/${this.playerNumber}`)
-          .set({
-            x: Math.round(this.me.m_userData.x),
-            y: Math.round(this.me.m_userData.y),
-          });
-        this.previousX = Math.round(this.me.m_userData.x);
-        this.previousY = Math.round(this.me.m_userData.y);
-        // for (let key in this.allPlayers) {
-        //   if (key !== theNum) {
-        //     console.log("allPlayers", this.allPlayers);
-        //   }
-        // }
-      }
+    }
+    if (
+      Math.round(this.me.m_userData.x) != this.previousX ||
+      Math.round(this.me.m_userData.y) != this.previousY
+    ) {
+      firebase
+        .database()
+        .ref(`testGame/${this.playerNumber}`)
+        .set({
+          x: Math.round(this.me.m_userData.x),
+          y: Math.round(this.me.m_userData.y),
+        });
+      this.previousX = Math.round(this.me.m_userData.x);
+      this.previousY = Math.round(this.me.m_userData.y);
+      // for (let key in this.allPlayers) {
+      //   if (key !== theNum) {
+      //     console.log("allPlayers", this.allPlayers);
+      //   }
+      // }
     }
   }
 }
