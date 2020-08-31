@@ -44,6 +44,8 @@ export const updatePlayerPositions = (data) => {
 
   // update other players
   Object.keys(data).forEach((userId) => {
+    console.log(this.me);
+
     // update existin player's position
     if (this.others[userId] && userId !== this.userId) {
       const incomingData = data[userId];
@@ -66,9 +68,14 @@ export const updatePlayerPositions = (data) => {
       // update my position
     } else if ((userId = this.userId)) {
       const myData = data[userId];
-      this.me.x = myData.x;
-      this.me.y = myData.y;
-      this.me.rotation = myData.bodyAngle;
+      console.log('here?');
+      if (!this.me) {
+        this.me = createBall(this, myData.x, myData.y, userRadius);
+      } else {
+        this.me.x = myData.x;
+        this.me.y = myData.y;
+        this.me.rotation = myData.bodyAngle;
+      }
     }
   });
 };
