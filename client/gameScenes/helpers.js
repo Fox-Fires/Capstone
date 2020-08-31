@@ -35,6 +35,9 @@ export const createBox = (scene, x, y, w, h) => {
 };
 
 export const updatePlayerPositions = (data) => {
+  console.log('top of data listener');
+  console.log('what is this?', this);
+
   // remove players no longer in the game
   Object.keys(this.others).forEach((userId) => {
     if (!data[userId]) {
@@ -45,8 +48,6 @@ export const updatePlayerPositions = (data) => {
 
   // update other players
   Object.keys(data).forEach((userId) => {
-    console.log(this.me);
-
     // update existin player's position
     if (this.others[userId] && userId !== this.userId) {
       const incomingData = data[userId];
@@ -67,16 +68,12 @@ export const updatePlayerPositions = (data) => {
       this.others[userId] = newPlayer;
 
       // update my position
-    } else if ((userId = this.userId)) {
+    } else if (userId === this.userId) {
       const myData = data[userId];
       console.log('here?');
-      if (!this.me) {
-        this.me = createBall(this, myData.x, myData.y, userRadius);
-      } else {
-        this.me.x = myData.x;
-        this.me.y = myData.y;
-        this.me.rotation = myData.bodyAngle;
-      }
+      this.me.x = myData.x;
+      this.me.y = myData.y;
+      this.me.rotation = myData.bodyAngle;
     }
   });
 };
