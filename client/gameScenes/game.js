@@ -25,49 +25,69 @@ export default class Game extends Phaser.Scene {
     this.allPlayers = {};
   }
 
-  async preload() {
-    try {
-      this.load.image('Gerg', './assets/Gerg.png');
-      const loadedData = JSON.parse(localStorage.getItem('User-form'));
-      const { data } = await axios.post(
-        'http://localhost:5001/capstonegolf-67769/us-central1/api/game',
-        {
-          userName: loadedData.name,
-        }
-      );
-      // .then((response) => {
-      //   console.log('initial load', response);
-      //   return response;
-      // });
-      console.log('what is the response?', data);
-      this.userId = data.userId;
-      this.gameId = data.gameId;
-      console.log('got IDs?', this.userId, this.gameId);
+  preload() {
+    // try {
+    this.load.image('Gerg', './assets/Gerg.png');
+    const loadedData = JSON.parse(localStorage.getItem('User-form'));
+    const apiRoute =
+      'http://localhost:5001/capstonegolf-67769/us-central1/api/game';
 
-      database
-        .ref(`games/${this.gameId}/users/${this.userId}`)
-        .onDisconnect()
-        .set({});
-    } catch (err) {
-      console.error(err);
-    }
+    const { data } = axios
+      .post(apiRoute, {
+        userName: loadedData.name,
+      })
+      .then(({ data }) => {
+        console.log('game data', data);
+        this.userId = data.userId;
+        this.gameId = data.gameId;
+        return database
+          .ref(`games/${this.gameId}/users/${this.userId}`)
+          .once('value', (snapshot) => {
+            const myData = snapshot.val();
+            // this.me = createBall(this, myData.x, myData.y, 15);
+            this.me.x = myData.x;
+            this.me.y = myData.y;
+            console.log('my data', { x: this.me.x, y: this.me.y });
+          });
+      })
+      .then(() => {
+        return database
+          .ref(`games/${this.gameId}/users/${this.userId}`)
+          .onDisconnect()
+          .set({});
+      })
+      .then(() => {
+        console.log('Done loading');
+      })
+      .catch(console.error);
+
+    // const out = await database
+    //   .ref(`games/${this.gameId}/users/${this.userId}`)
+    //   .once('value', (snapshot) => {
+    //     const myData = snapshot.val();
+    //     console.log('initial data', myData);
+    //     this.me = createBall(this, myData.x, myData.y, 15);
+    //   });
+    // console.log('This is me', this.me);
+
+    // database
+    //   .ref(`games/${this.gameId}/users/${this.userId}`)
+    //   .onDisconnect()
+    //   .set({});
+    // } catch (err) {
+    //   console.error(err);
+    // }
   }
 
-  async create() {
+  create() {
     this.worldScale = 30;
-    createBox(this, 800 / 2, 600 - 20, 800, 40);
-    createBox(this, 800 / 2, 20, 800, 40);
-    createBox(this, 20, 600 / 2, 40, 600);
-    createBox(this, 800 - 20, 600 / 2, 40, 600);
+    createBox(this, 0, 0, 800, 40); // top
+    createBox(this, 0, 560, 800, 40); // bottom
+    createBox(this, 0, 0, 40, 600); // left
+    createBox(this, 760, 0, 40, 600); // right
 
     // load me
-    const out = await database
-      .ref(`games/${this.gameId}/users/${this.userId}`)
-      .once('value', (snapshot) => {
-        const myData = snapshot.val();
-        console.log('initial data', myData);
-        this.me = createBall(this, myData.x, myData.y, 15);
-      });
+    this.me = createBall(this, 0, 0, 15);
 
     // add listener for new data
     const f = updatePlayerPositions.bind(this);
@@ -91,10 +111,10 @@ export default class Game extends Phaser.Scene {
           // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
           // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
-            this.me.m_userData.x,
-            this.me.m_userData.y,
-            this.me.m_userData.x - difx,
-            this.me.m_userData.y - dify
+            this.me.x,
+            this.me.y,
+            this.me.x - difx,
+            this.me.y - dify
           );
           const points = this.line1.getPoints(10);
           for (let i = 0; i < points.length; i++) {
@@ -123,11 +143,11 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
         if (this.clicked) {
-          this.me.applyLinearImpulse(
-            planck.Vec2(difx / 2, dify / 2),
-            planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
-            true
-          );
+          // this.me.applyLinearImpulse(
+          //   planck.Vec2(difx / 2, dify / 2),
+          //   planck.Vec2(this.me.x, this.me.y),
+          //   true
+          // );
           axios.put(
             `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
             { x: difx / 2, y: dify / 2 }
@@ -140,7 +160,7 @@ export default class Game extends Phaser.Scene {
 
     // camera
     // breaking over here
-    this.cameras.main.startFollow(this.me.getUserData());
+    this.cameras.main.startFollow(this.me);
     this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
@@ -187,10 +207,10 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - this.pointer.x;
         let dify = 300 - this.pointer.y;
         this.line1.setTo(
-          this.me.m_userData.x,
-          this.me.m_userData.y,
-          this.me.m_userData.x - difx,
-          this.me.m_userData.y - dify
+          this.me.x,
+          this.me.y,
+          this.me.x - difx,
+          this.me.y - dify
         );
       }
       const points = this.line1.getPoints(10);
@@ -201,11 +221,11 @@ export default class Game extends Phaser.Scene {
       }
     }
     if (
-      Math.round(this.me.m_userData.x) != this.previousX ||
-      Math.round(this.me.m_userData.y) != this.previousY
+      Math.round(this.me.x) != this.previousX ||
+      Math.round(this.me.y) != this.previousY
     ) {
-      this.previousX = Math.round(this.me.m_userData.x);
-      this.previousY = Math.round(this.me.m_userData.y);
+      this.previousX = Math.round(this.me.x);
+      this.previousY = Math.round(this.me.y);
     }
   }
 }

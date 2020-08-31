@@ -28,7 +28,8 @@ export const createBox = (scene, x, y, w, h) => {
 
   const box = scene.add.graphics();
   box.fillStyle(color.color, 1);
-  box.fillRect(-w / 2, -h / 2, w, h);
+  // box.fillRect(-w / 2, -h / 2, w, h);
+  box.fillRect(x, y, w, h);
 
   return box;
 };
