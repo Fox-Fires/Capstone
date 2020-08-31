@@ -45,10 +45,10 @@ class Physics extends planck.World {
     db.ref(`games/${this.gameId}`).set({});
   }
 
-  addUser(x, y, userName) {
+  async addUser(x, y, userName) {
     // make new user in DB
     const id = db.ref(`games/${this.gameId}/users`).push().key;
-    db.ref(`games/${this.gameId}/users/${id}`).set({
+    await db.ref(`games/${this.gameId}/users/${id}`).set({
       x,
       y,
       bodyAngle: 0,

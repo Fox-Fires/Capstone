@@ -58,13 +58,13 @@ app.post('/player', (req, res) => {
     });
 });
 
-app.post('/game', (req, res) => {
+app.post('/game', async (req, res) => {
   if (!game) {
     game = new Physics();
     game.loadLevel(barriers.test);
     game.startGame();
   }
-  const newUser = game.addUser(120, 120, req.body.userName);
+  const newUser = await game.addUser(120, 120, req.body.userName);
   const userId = newUser.getUserData().id;
   const gameId = game.gameId;
   res.json({ userId, gameId });

@@ -29,14 +29,20 @@ export default class Game extends Phaser.Scene {
     try {
       this.load.image('Gerg', './assets/Gerg.png');
       const loadedData = JSON.parse(localStorage.getItem('User-form'));
-      const {
-        data,
-      } = await axios.post(
+      const { data } = await axios.post(
         'http://localhost:5001/capstonegolf-67769/us-central1/api/game',
-        { userName: loadedData.name }
+        {
+          userName: loadedData.name,
+        }
       );
+      // .then((response) => {
+      //   console.log('initial load', response);
+      //   return response;
+      // });
+      console.log('what is the response?', data);
       this.userId = data.userId;
       this.gameId = data.gameId;
+      console.log('got IDs?', this.userId, this.gameId);
 
       database
         .ref(`games/${this.gameId}/users/${this.userId}`)
@@ -47,7 +53,7 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  create() {
+  async create() {
     this.worldScale = 30;
     createBox(this, 800 / 2, 600 - 20, 800, 40);
     createBox(this, 800 / 2, 20, 800, 40);
@@ -55,15 +61,13 @@ export default class Game extends Phaser.Scene {
     createBox(this, 800 - 20, 600 / 2, 40, 600);
 
     // load me
-    console.log('initial load', this.gameId, this.userId);
-    const out = database
+    const out = await database
       .ref(`games/${this.gameId}/users/${this.userId}`)
       .once('value', (snapshot) => {
         const myData = snapshot.val();
         console.log('initial data', myData);
         this.me = createBall(this, myData.x, myData.y, 15);
       });
-    console.log('database return', out);
 
     // add listener for new data
     const f = updatePlayerPositions.bind(this);
@@ -175,8 +179,6 @@ export default class Game extends Phaser.Scene {
     //   userData.y = bodyPosition.y * this.worldScale;
     //   userData.rotation = bodyAngle;
     // }
-
-    console.log('are we failing somewhere here?');
 
     //Graphics for dotted line indicator
     this.graphics.clear();
