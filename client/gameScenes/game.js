@@ -22,7 +22,7 @@ export default class Game extends Phaser.Scene {
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
-    this.gameId = null
+    this.gameId = null;
     this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
@@ -39,7 +39,9 @@ export default class Game extends Phaser.Scene {
     try {
       this.load.image("Gerg", "./assets/Gerg.png");
       const loadedData = JSON.parse(localStorage.getItem("User-form"));
-      const {data} = await axios.post(
+      const {
+        data,
+      } = await axios.post(
         "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
         { userName: loadedData.name }
       );
@@ -204,15 +206,16 @@ export default class Game extends Phaser.Scene {
             true
           );
           //Attach move to user, and send to database
-          if(this.gameId !==null && this.userId !==null)
-          firebase
-            .database()
-            .ref(`games/${this.gameId}/users/${this.userId}/move`)
-            .set({
-              vec2x: difx/2,
-              vec2y: dify/2,
-              waiting: false
-            })
+          if (this.gameId !== null && this.userId !== null)
+            firebase
+              .database()
+              .ref(`games/${this.gameId}/users/${this.userId}/move`)
+              .push({
+                vec2x: difx / 2,
+                vec2y: dify / 2,
+                waiting: false,
+                receipt: 238994836,
+              });
         }
         this.clicked = false;
       },
@@ -416,24 +419,24 @@ export default class Game extends Phaser.Scene {
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
     }
-      if (
-        Math.round(this.me.m_userData.x) != this.previousX ||
-        Math.round(this.me.m_userData.y) != this.previousY
-      ) {
-        firebase
-          .database()
-          .ref(`testGame/${this.playerNumber}`)
-          .set({
-            x: Math.round(this.me.m_userData.x),
-            y: Math.round(this.me.m_userData.y),
-          });
-        this.previousX = Math.round(this.me.m_userData.x);
-        this.previousY = Math.round(this.me.m_userData.y);
-        // for (let key in this.allPlayers) {
-        //   if (key !== theNum) {
-        //     console.log("allPlayers", this.allPlayers);
-        //   }
-        // }
-      }
+    if (
+      Math.round(this.me.m_userData.x) != this.previousX ||
+      Math.round(this.me.m_userData.y) != this.previousY
+    ) {
+      firebase
+        .database()
+        .ref(`testGame/${this.playerNumber}`)
+        .set({
+          x: Math.round(this.me.m_userData.x),
+          y: Math.round(this.me.m_userData.y),
+        });
+      this.previousX = Math.round(this.me.m_userData.x);
+      this.previousY = Math.round(this.me.m_userData.y);
+      // for (let key in this.allPlayers) {
+      //   if (key !== theNum) {
+      //     console.log("allPlayers", this.allPlayers);
+      //   }
+      // }
+    }
   }
 }
