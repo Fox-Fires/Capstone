@@ -1,15 +1,15 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Physics } = require('./physics');
-const planck = require('planck-js');
-const cors = require('cors')
+const cors = require('cors');
+const { barriers } = require('./constants');
 
 // admin.initializeApp();
 
 const express = require('express');
 const app = express();
 
-let game=undefined;
+let game = undefined;
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
@@ -19,7 +19,7 @@ exports.helloWorlds = functions.https.onRequest((request, response) => {
 });
 
 //Helps avoid cors mismatch between client and server.
-app.use(cors({origin:true}));
+app.use(cors({ origin: true }));
 
 app.get('/player', (req, res) => {
   admin
@@ -58,21 +58,22 @@ app.post('/player', (req, res) => {
     });
 });
 
-app.post('/game',(req,res)=>{
-  if(!game) {
+app.post('/game', (req, res) => {
+  if (!game) {
     game = new Physics();
+    game.loadLevel(barriers.test);
     game.startGame();
   }
-  const newUser = game.addUser(400,100,req.body.userName)
-  const userId = newUser.getUserData().id
-  const gameId = game.gameId
-  res.json({userId,gameId})
-})
+  const newUser = game.addUser(120, 120, req.body.userName);
+  const userId = newUser.getUserData().id;
+  const gameId = game.gameId;
+  res.json({ userId, gameId });
+});
 
-app.delete('/game',(req,res)=>{
-  const {userId,gameId} = req.body;
+app.delete('/game', (req, res) => {
+  const { userId, gameId } = req.body;
   game.removeUser(userId);
-  res.sendStatus(200)
-})
+  res.sendStatus(200);
+});
 
 exports.api = functions.https.onRequest(app);

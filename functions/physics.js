@@ -17,6 +17,7 @@ class Physics extends planck.World {
     super(config || {});
     this.shouldWriteData = true;
     this.users = {};
+    this.barriers = [];
     this.timer = null;
     this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
@@ -76,7 +77,7 @@ class Physics extends planck.World {
 
   removeUser(userId) {
     // remove user form engine
-    const user = this.users[userId]
+    const user = this.users[userId];
     this.destroyBody(user);
 
     // remove user from this.users
@@ -84,6 +85,26 @@ class Physics extends planck.World {
 
     // remove user reference in db
     db.ref(`games/${this.gameId}/users/${userId}`).set({});
+  }
+
+  loadLevel(barriers) {
+    // clear all barriers
+    this.clearLevel();
+
+    // add in new barriers
+    barriers.forEach(({ x, y, w, h }) => {
+      this.addBarrier(x, y, w, h);
+    });
+  }
+
+  clearLevel() {
+    // remove barriers from physics engine
+    this.barriers.forEach((barrier) => {
+      this.destroyBody(barrier);
+    });
+
+    // clear list of barriers
+    this.barriers = [];
   }
 
   addBarrier(x, y, w, h) {
@@ -101,6 +122,9 @@ class Physics extends planck.World {
       type: 'barrier',
     });
 
+    // add barrier to collection
+    this.barriers.push(barrier);
+
     return barrier;
   }
 
@@ -116,7 +140,7 @@ class Physics extends planck.World {
 
   writeUser(user) {
     // pull out relevant information
-    const pos = user.getPosition()
+    const pos = user.getPosition();
     const gameId = this.gameId;
     const userData = user.getUserData();
     const userId = userData.id;
@@ -125,22 +149,77 @@ class Physics extends planck.World {
     const prevY = userData.prevY;
     const prevAng = userData.prevAng;
 
+    // check for move from client
+    this.puttUser(userId);
+
     // only update if user has moved since last update
     if (pos.x !== prevX || pos.y !== prevY || bodyAngle !== prevAng) {
       db.ref(`games/${gameId}/users/${userId}`).set({
-        x: pos.x*worldScale,
-        y: pos.y*worldScale,
+        x: pos.x * worldScale,
+        y: pos.y * worldScale,
         bodyAngle: bodyAngle,
       });
 
       // update prev x and y
       user.setUserData({
-        ...user.getUserData(),
+        ...userData,
         prevX: pos.x,
         prevY: pos.y,
         prevAng: bodyAngle,
       });
     }
+  }
+
+  puttUser(userId) {
+    const user = this.users[userId];
+    const pos = user.getPosition();
+
+    // Look for move on user, and apply move
+    db.ref(`games/${this.gameId}/users/${userId}/move`).once(
+      'value',
+      (snapshot) => {
+        const userMove = snapshot.val();
+
+        // check if there's a move waiting to be applied
+        if (userMove && userMove.waiting === false) {
+          console.log(
+            'sending move:',
+            userMove.vec2x,
+            userMove.vec2y,
+            'to:',
+            pos.x * worldScale,
+            pos.y * worldScale
+          );
+
+          // apply it
+          user.applyLinearImpulse(
+            planck.Vec2(userMove.vec2x, userMove.vec2y),
+            planck.Vec2(pos.x * worldScale, pos.y * worldScale),
+            true
+          );
+
+          // clear move in db
+          db.ref(`games/${this.gameId}/users/${userId}/move`).set(
+            { what: 'the', waiting: true },
+            function (error) {
+              if (error) {
+              } else {
+                console.log('Applied Move');
+              }
+            }
+          );
+        }
+      }
+    );
+    // if (userMove.waiting === 'false') {
+    //   console.log(
+    //     'where is this logging to?:',
+    //     userMove.waiting,
+    //     userMove.vec2x,
+    //     userMove.vec2y
+    //   );
+    //   userMove.set({ waiting: true });
+    // }
   }
 
   update() {
