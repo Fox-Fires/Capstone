@@ -210,11 +210,11 @@ export default class Game extends Phaser.Scene {
             firebase
               .database()
               .ref(`games/${this.gameId}/users/${this.userId}/move`)
-              .push({
+              .set({
                 vec2x: difx / 2,
                 vec2y: dify / 2,
                 waiting: false,
-                receipt: 238994836,
+                receipt: Math.random().toString().split(".")[1],
               });
         }
         this.clicked = false;
