@@ -20,7 +20,6 @@ export default class Game extends Phaser.Scene {
     this.previousY = 0;
     this.userId = null;
     this.gameId = null;
-    this.database = firebase.database();
     this.allPlayers = {};
     this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
     this.createBall = this.createBall.bind(this);
@@ -43,11 +42,11 @@ export default class Game extends Phaser.Scene {
       console.error(err);
     }
   }
+
   trackAndRenderPlayers() {
     let user = {};
-    // const rootRef = firebase.database().ref('testGame');
-    console.log(database);
     const rootRef = database.ref('testGame');
+    console.log('track and render players');
 
     const urlRef = rootRef.child('/');
     urlRef.on('value', (snapshot) => {
@@ -55,15 +54,9 @@ export default class Game extends Phaser.Scene {
     });
     urlRef.once('value', (snapshot) => {
       this.makePlayers(snapshot.val());
-
-      // console.log(user);
-      // for (let key in user) {
-      //   if (key !== theNum) {
-      //     console.log(user);
-      //   }
-      // }
     });
   }
+
   makePlayers(data) {
     for (let key in data) {
       if (key !== this.playerNumber) {
@@ -207,6 +200,8 @@ export default class Game extends Phaser.Scene {
       },
       this
     );
+
+    // camera
     this.cameras.main.startFollow(this.me.getUserData());
     this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
@@ -259,6 +254,7 @@ export default class Game extends Phaser.Scene {
     circle.setUserData(userData);
     return circle;
   }
+
   createGerg(posX, posY, radius) {
     const ballFixDef = {
       friction: 0.1,
@@ -285,20 +281,13 @@ export default class Game extends Phaser.Scene {
       I: 0.1,
     });
     let userData = this.add.image(posX, posY, 'Gerg');
-    // var color = new Phaser.Display.Color();
-    // color.random();
-    // color.brighten(50).saturate(100);
-    // let userData = this.add.graphics();
-    // userData.fillStyle(color.color, 1);
-    // userData.fillCircle(0, 0, radius);
 
     // a body can have anything in its user data, normally it's used to store its sprite
     circle.setUserData(userData);
     return circle;
   }
-  // here we go with some Box2D stuff
+
   // arguments: x, y coordinates of the center, with and height of the box, in pixels
-  // we'll conver pixels to meters inside the method
   createBox(posX, posY, width, height, isDynamic, sensor) {
     // this is how we create a generic Box2D body
     let box = this.world.createBody();
@@ -327,8 +316,6 @@ export default class Game extends Phaser.Scene {
     box.setMassData({
       mass: 1,
       center: planck.Vec2(),
-
-      // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
       I: 1,
     });
 
@@ -355,15 +342,7 @@ export default class Game extends Phaser.Scene {
   // }
 
   update() {
-    // if(this.gameId!==null){
-    //   const allPlayersRef = firebase
-    //   .database()
-    //   .ref(`games/${this.gameId}/users`);
-    //   allPlayersRef.onDisconnect().set({});
-
-    //   console.log("allplayers:",allPlayersRef)
-    // }
-    // advance the simulation by 1/20 seconds
+    // advance the simulation by 1/60 seconds
     this.world.step(1 / 60);
 
     // crearForces  method should be added at the end on each step
@@ -409,13 +388,10 @@ export default class Game extends Phaser.Scene {
       Math.round(this.me.m_userData.x) != this.previousX ||
       Math.round(this.me.m_userData.y) != this.previousY
     ) {
-      firebase
-        .database()
-        .ref(`testGame/${this.playerNumber}`)
-        .set({
-          x: Math.round(this.me.m_userData.x),
-          y: Math.round(this.me.m_userData.y),
-        });
+      database.ref(`testGame/${this.playerNumber}`).set({
+        x: Math.round(this.me.m_userData.x),
+        y: Math.round(this.me.m_userData.y),
+      });
       this.previousX = Math.round(this.me.m_userData.x);
       this.previousY = Math.round(this.me.m_userData.y);
       // for (let key in this.allPlayers) {

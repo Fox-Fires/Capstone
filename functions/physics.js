@@ -227,7 +227,8 @@ class Physics extends planck.World {
     const pos = user.getPosition();
 
     if (user) {
-      console.log(`impulse applied to ${user.getUserData().userName}`);
+      console.log('impulse applied to');
+      console.log(user.getUserData().userName);
       user.applyLinearImpulse(
         planck.Vec2(x, y),
         planck.Vec2(pos.x, pos.y).mul(worldScale),
