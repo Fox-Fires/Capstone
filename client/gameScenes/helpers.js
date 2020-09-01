@@ -16,7 +16,9 @@ export const createBall = (scene, x, y, r) => {
 
   const ball = scene.add.graphics();
   ball.fillStyle(color.color, 1);
-  ball.fillCircle(x, y, r);
+  ball.fillCircle(0, 0, r);
+  ball.x = x;
+  ball.y = y;
 
   return ball;
 };
@@ -28,7 +30,6 @@ export const createBox = (scene, x, y, w, h) => {
 
   const box = scene.add.graphics();
   box.fillStyle(color.color, 1);
-  // box.fillRect(-w / 2, -h / 2, w, h);
   box.fillRect(x, y, w, h);
 
   return box;
