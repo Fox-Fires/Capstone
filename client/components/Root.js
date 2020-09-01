@@ -20,9 +20,6 @@ export default class Root extends React.Component {
     //Load data if repeat visitor
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
     this.setState(loadedData);
-    database.ref('games/testGame').on('value', function (snap) {
-      console.log(snap);
-    });
   }
 
   componentDidUpdate() {

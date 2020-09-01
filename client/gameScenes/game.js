@@ -1,15 +1,16 @@
-import planck from "planck-js";
-import firebase from "firebase/app";
-import "firebase/database";
-import firebaseConfig from "../../Firebase/firebaseConfig";
-import axios from "axios";
+import planck from 'planck-js';
+import { database } from '../../Firebase/main';
+import axios from 'axios';
+
+import { createBall, createBox } from './helpers';
+
+const userRadius = 15;
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: "Game",
+      key: 'Game',
     });
-    this.destroy = this.destroy.bind(this);
     this.me = null;
     this.clicked = false;
     this.line1;
@@ -18,145 +19,121 @@ export default class Game extends Phaser.Scene {
     // this.graphics = this.add.graphics({
     //   fillStyle: { color: 0xff0000 },
     // });
-    firebase.initializeApp(firebaseConfig);
+    // firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
     this.gameId = null;
-    this.database = firebase.database();
     this.allPlayers = {};
-    this.trackAndRenderPlayers = this.trackAndRenderPlayers.bind(this);
-    this.createBall = this.createBall.bind(this);
-    this.makePlayers = this.makePlayers.bind(this);
+    this.updatePlayerPositions = this.updatePlayerPositions.bind(this);
+    this.others = {};
   }
-  destroy(body) {
-    this.world.destroyBody(body);
-  }
-  // preload() {
-  //   this.load.image("Gerg", "./assets/Gerg.png");
-  // }
-  async preload() {
-    try {
-      this.load.image("Gerg", "./assets/Gerg.png");
-      const loadedData = JSON.parse(localStorage.getItem("User-form"));
-      const {
-        data,
-      } = await axios.post(
-        "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
-        { userName: loadedData.name }
-      );
-      this.userId = data.userId;
-      this.gameId = data.gameId;
-    } catch (err) {
-      console.error(err);
-    }
-  }
-  trackAndRenderPlayers() {
-    let user = {};
-    const rootRef = firebase.database().ref("testGame");
 
-    const urlRef = rootRef.child("/");
-    urlRef.on("value", (snapshot) => {
-      user = snapshot.val();
-    });
-    urlRef.once("value", (snapshot) => {
-      this.makePlayers(snapshot.val());
+  preload() {
+    // try {
+    this.load.image('Gerg', './assets/Gerg.png');
+    const loadedData = JSON.parse(localStorage.getItem('User-form'));
+    const apiRoute =
+      'http://localhost:5001/capstonegolf-67769/us-central1/api/game';
 
-      // console.log(user);
-      // for (let key in user) {
-      //   if (key !== theNum) {
-      //     console.log(user);
-      //   }
-      // }
-    });
+    const { data } = axios
+      .post(apiRoute, {
+        userName: loadedData.name,
+      })
+      .then(({ data }) => {
+        console.log('game data', data);
+        this.userId = data.userId;
+        this.gameId = data.gameId;
+        return database
+          .ref(`games/${this.gameId}/users/${this.userId}`)
+          .once('value', (snapshot) => {
+            const myData = snapshot.val();
+            // this.me = createBall(this, myData.x, myData.y, 15);
+            this.me.x = myData.x;
+            this.me.y = myData.y;
+            console.log('my data', { x: this.me.x, y: this.me.y });
+          });
+      })
+      .then(() => {
+        return database
+          .ref(`games/${this.gameId}/users/${this.userId}`)
+          .onDisconnect()
+          .set({});
+      })
+      .then(() => {
+        console.log(`getting ready to bind to game ${this.gameId}`);
+        // const f = updatePlayerPositions.bind(this);
+        return database
+          .ref(`games/${this.gameId}/users`)
+          .on('value', (snapshot) => {
+            this.updatePlayerPositions(snapshot.val());
+          });
+      })
+      .then(() => {
+        console.log('Done loading');
+      })
+      .catch(console.error);
   }
-  makePlayers(data) {
-    for (let key in data) {
-      if (key !== this.playerNumber) {
-        this.createBall(data[key].x, data[key].y, 15);
+
+  updatePlayerPositions(data) {
+    // remove players no longer in the game
+    Object.keys(this.others).forEach((userId) => {
+      if (!data[userId]) {
+        this.others[userId].destroy();
+        delete this.others[userId];
       }
-    }
+    });
+
+    // update other players
+    Object.keys(data).forEach((userId) => {
+      // update existin player's position
+      if (this.others[userId] && userId !== this.userId) {
+        const incomingData = data[userId];
+        const player = this.others[userId];
+        player.x = incomingData.x;
+        player.y = incomingData.y;
+        player.rotation = incomingData.bodyAngle;
+
+        // add new players
+      } else if (!this.others[userId] && userId !== this.userId) {
+        const newPlayerData = data[userId];
+        console.log('new player data', newPlayerData);
+        const newPlayer = createBall(
+          this,
+          newPlayerData.x,
+          newPlayerData.y,
+          userRadius
+        );
+        this.others[userId] = newPlayer;
+
+        // update my position
+      } else if (userId === this.userId) {
+        const myData = data[userId];
+        this.me.x = myData.x;
+        this.me.y = myData.y;
+        this.me.rotation = myData.bodyAngle;
+      }
+    });
   }
 
   create() {
-    this.trackAndRenderPlayers();
-    // Box2D works with meters. We need to convert meters to pixels.
-    // let's say 30 pixels = 1 meter.
     this.worldScale = 30;
-    // this.add.image(0, 0, "Gerg");
-    // world gravity, as a Vec2 object. It's just a x, y vector
-    let gravity = planck.Vec2(0, 1);
-    // this is how we create a Box2D world
-    this.world = planck.World({});
+    createBox(this, 0, 0, 800, 40); // top
+    createBox(this, 0, 560, 800, 40); // bottom
+    createBox(this, 0, 0, 40, 600); // left
+    createBox(this, 760, 0, 40, 600); // right
 
-    const ballFixDef = {
-      friction: 0.1,
-      restitution: 0.9,
-      density: 1,
-      userData: "ball",
-    };
-    const railFixDef = {
-      friction: 0.1,
-      restitution: 0.09,
-      isSensor: true,
-      userData: "rail",
-    };
+    // load me
+    this.me = createBall(this, 0, 0, userRadius);
 
-    this.world.on("post-solve", (contact) => {
-      const fixtureA = contact.getFixtureA();
-      const fixtureB = contact.getFixtureB();
-      // if (fixtureB) {
-      //   alert("You won!!!");
-      // }
-      const destroy = this.world.destroyBody;
-      const rail =
-        (fixtureA.getUserData() === railFixDef.userData &&
-          fixtureA.getBody()) ||
-        (fixtureB.getUserData() === railFixDef.userData && fixtureB.getBody());
-      const ball =
-        (fixtureA.getUserData() === ballFixDef.userData &&
-          fixtureA.getBody()) ||
-        (fixtureB.getUserData() === ballFixDef.userData && fixtureB.getBody());
-      // console.log("ball, rail", ball, rail);
-      setTimeout(function () {
-        if (ball && rail) {
-          // console.log(this.world);
-          // destroy(ball);
-          // console.log("destroy");
-        }
-      }, 1);
-
-      // setTimeout(function () {
-      //   if (fixtureB) {
-      //     alert("You won!!!");
-      //     this.world.destroyBody(ball);
-      //   }
-      // }, 1);
-    });
-    // createBox is a method I wrote to create a box, see how it works at line 55
-    const floorSensor = this.createBox(800 / 2, 600 - 20, 800, 40, false, true);
-    const floor = this.createBox(800 / 2, 600 - 20, 800, 40, false, false);
-    const wallTop = this.createBox(800 / 2, 20, 800, 40, false, false);
-    const wallLeft = this.createBox(20, 600 / 2, 40, 600, false, false);
-    const wallRight = this.createBox(800 - 20, 600 / 2, 40, 600, false, false);
-    // const ball2 = this.createBall(400, 100, 15);
-    // const ball = this.createBall(400, 250, 15);
-    // ball.applyForce(planck.Vec2(0, 400), planck.Vec2(0, 0));
-    const ball1 = this.createBall(200, 60, 15);
-    const ball3 = this.createBall(600, 190, 15);
-    const gerg = this.createGerg(120, 120, 15);
-    this.createBall(615, 190, 15);
-    this.me = gerg;
-    // console.log(this.me.m_userData);
-    // console.log(this.me.m_userData.x);
-    // console.log(this.me.m_userData.y);
+    // add listener for new data
 
     //Pointer graphic
     this.graphics = this.add.graphics({
       fillStyle: { color: 0xff0000 },
     });
     this.input.on(
-      "pointerdown",
+      'pointerdown',
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
@@ -167,10 +144,10 @@ export default class Game extends Phaser.Scene {
           // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
           // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
-            this.me.m_userData.x,
-            this.me.m_userData.y,
-            this.me.m_userData.x - difx,
-            this.me.m_userData.y - dify
+            this.me.x,
+            this.me.y,
+            this.me.x - difx,
+            this.me.y - dify
           );
           const points = this.line1.getPoints(10);
           for (let i = 0; i < points.length; i++) {
@@ -184,7 +161,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointermove",
+      'pointermove',
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
@@ -194,35 +171,30 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointerup",
+      'pointerup',
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
-        // console.log("up", difx, dify);
         if (this.clicked) {
-          this.me.applyLinearImpulse(
-            planck.Vec2(difx / 2, dify / 2),
-            planck.Vec2(this.me.m_userData.x, this.me.m_userData.y),
-            true
+          // this.me.applyLinearImpulse(
+          //   planck.Vec2(difx / 2, dify / 2),
+          //   planck.Vec2(this.me.x, this.me.y),
+          //   true
+          // );
+          axios.put(
+            `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
+            { x: difx / 2, y: dify / 2 }
           );
-          //Attach move to user, and send to database
-          if (this.gameId !== null && this.userId !== null)
-            firebase
-              .database()
-              .ref(`games/${this.gameId}/users/${this.userId}/move`)
-              .set({
-                vec2x: difx / 2,
-                vec2y: dify / 2,
-                waiting: false,
-                receipt: Math.random().toString().split(".")[1],
-              });
         }
         this.clicked = false;
       },
       this
     );
-    this.cameras.main.startFollow(this.me.getUserData());
-    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
+
+    // camera
+    // breaking over here
+    this.cameras.main.startFollow(this.me);
+    this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
@@ -237,168 +209,30 @@ export default class Game extends Phaser.Scene {
     });
   }
 
-  createBall(posX, posY, radius) {
-    const ballFixDef = {
-      friction: 0.1,
-      restitution: 0.9,
-      density: 1,
-      userData: "ball",
-    };
-    const ballBodyDef = {
-      linearDamping: 1.5,
-      angularDamping: 1,
-    };
-
-    let circle = this.world.createDynamicBody(ballBodyDef);
-    // circle.setDynamic();
-    circle.createFixture(planck.Circle(radius / this.worldScale), ballFixDef);
-    circle.setPosition(
-      planck.Vec2(posX / this.worldScale, posY / this.worldScale)
-    );
-    circle.setMassData({
-      mass: 1,
-      center: planck.Vec2(),
-
-      // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
-      I: 0,
-    });
-    var color = new Phaser.Display.Color();
-    color.random();
-    color.brighten(50).saturate(100);
-    let userData = this.add.graphics();
-    userData.fillStyle(color.color, 1);
-    userData.fillCircle(0, 0, radius);
-
-    // a body can have anything in its user data, normally it's used to store its sprite
-    circle.setUserData(userData);
-    return circle;
-  }
-  createGerg(posX, posY, radius) {
-    const ballFixDef = {
-      friction: 0.1,
-      restitution: 0.9,
-      density: 1,
-      userData: "ball",
-    };
-    const ballBodyDef = {
-      linearDamping: 1.5,
-      angularDamping: 10,
-    };
-
-    let circle = this.world.createDynamicBody(ballBodyDef);
-    // circle.setDynamic();
-    circle.createFixture(planck.Circle(radius / this.worldScale), ballFixDef);
-    circle.setPosition(
-      planck.Vec2(posX / this.worldScale, posY / this.worldScale)
-    );
-    circle.setMassData({
-      mass: 1,
-      center: planck.Vec2(),
-
-      // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
-      I: 0.1,
-    });
-    let userData = this.add.image(posX, posY, "Gerg");
-    // var color = new Phaser.Display.Color();
-    // color.random();
-    // color.brighten(50).saturate(100);
-    // let userData = this.add.graphics();
-    // userData.fillStyle(color.color, 1);
-    // userData.fillCircle(0, 0, radius);
-
-    // a body can have anything in its user data, normally it's used to store its sprite
-    circle.setUserData(userData);
-    return circle;
-  }
-  // here we go with some Box2D stuff
-  // arguments: x, y coordinates of the center, with and height of the box, in pixels
-  // we'll conver pixels to meters inside the method
-  createBox(posX, posY, width, height, isDynamic, sensor) {
-    // this is how we create a generic Box2D body
-    let box = this.world.createBody();
-    if (isDynamic) {
-      // Box2D bodies born as static bodies, but we can make them dynamic
-      box.setDynamic();
-    }
-    const railFixDef = {
-      friction: 0.1,
-      restitution: 0.09,
-      isSensor: sensor,
-      userData: "rail",
-    };
-    // a body can have one or more fixtures. This is how we create a box fixture inside a body
-    box.createFixture(
-      planck.Box(width / 2 / this.worldScale, height / 2 / this.worldScale),
-      railFixDef
-    );
-
-    // now we place the body in the world
-    box.setPosition(
-      planck.Vec2(posX / this.worldScale, posY / this.worldScale)
-    );
-
-    // time to set mass information
-    box.setMassData({
-      mass: 1,
-      center: planck.Vec2(),
-
-      // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
-      I: 1,
-    });
-
-    // now we create a graphics object representing the body
-    var color = new Phaser.Display.Color();
-    color.random();
-    color.brighten(50).saturate(100);
-    let userData = this.add.graphics();
-    userData.fillStyle(color.color, 1);
-    userData.fillRect(-width / 2, -height / 2, width, height);
-
-    // a body can have anything in its user data, normally it's used to store its sprite
-    box.setUserData(userData);
-  }
-
-  // updatePlayerPositions() {
-  //   this.getPlayers();
-  //   console.log("🪀Work:", this.allPlayers);
-  //   Object.keys(this.allPlayers).forEach((characterKey) => {
-  //     if (this.allPlayers[characterKey] && characterKey != this.playerNumber) {
-  //       const incomingData = characterKey;
-  //     }
-  //   });
-  // }
-
   update() {
-    // if(this.gameId!==null){
-    //   const allPlayersRef = firebase
-    //   .database()
-    //   .ref(`games/${this.gameId}/users`);
-    //   allPlayersRef.onDisconnect().set({});
-
-    //   console.log("allplayers:",allPlayersRef)
-    // }
-    // advance the simulation by 1/20 seconds
-    this.world.step(1 / 60);
+    // advance the simulation by 1/60 seconds
+    // this.world.step(1 / 60);
 
     // crearForces  method should be added at the end on each step
-    this.world.clearForces();
+    // this.world.clearForces();
 
     // iterate through all bodies
-    for (let b = this.world.getBodyList(); b; b = b.getNext()) {
-      // get body position
-      let bodyPosition = b.getPosition();
+    // for (let b = this.world.getBodyList(); b; b = b.getNext()) {
+    //   // get body position
+    //   let bodyPosition = b.getPosition();
 
-      // get body angle, in radians
-      let bodyAngle = b.getAngle();
+    //   // get body angle, in radians
+    //   let bodyAngle = b.getAngle();
 
-      // get body user data, the graphics object
-      let userData = b.getUserData();
+    //   // get body user data, the graphics object
+    //   let userData = b.getUserData();
 
-      // adjust graphic object position and rotation
-      userData.x = bodyPosition.x * this.worldScale;
-      userData.y = bodyPosition.y * this.worldScale;
-      userData.rotation = bodyAngle;
-    }
+    //   // adjust graphic object position and rotation
+    //   userData.x = bodyPosition.x * this.worldScale;
+    //   userData.y = bodyPosition.y * this.worldScale;
+    //   userData.rotation = bodyAngle;
+    // }
+
     //Graphics for dotted line indicator
     this.graphics.clear();
     if (this.clicked) {
@@ -406,10 +240,10 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - this.pointer.x;
         let dify = 300 - this.pointer.y;
         this.line1.setTo(
-          this.me.m_userData.x,
-          this.me.m_userData.y,
-          this.me.m_userData.x - difx,
-          this.me.m_userData.y - dify
+          this.me.x,
+          this.me.y,
+          this.me.x - difx,
+          this.me.y - dify
         );
       }
       const points = this.line1.getPoints(10);
@@ -420,23 +254,11 @@ export default class Game extends Phaser.Scene {
       }
     }
     if (
-      Math.round(this.me.m_userData.x) != this.previousX ||
-      Math.round(this.me.m_userData.y) != this.previousY
+      Math.round(this.me.x) != this.previousX ||
+      Math.round(this.me.y) != this.previousY
     ) {
-      firebase
-        .database()
-        .ref(`testGame/${this.playerNumber}`)
-        .set({
-          x: Math.round(this.me.m_userData.x),
-          y: Math.round(this.me.m_userData.y),
-        });
-      this.previousX = Math.round(this.me.m_userData.x);
-      this.previousY = Math.round(this.me.m_userData.y);
-      // for (let key in this.allPlayers) {
-      //   if (key !== theNum) {
-      //     console.log("allPlayers", this.allPlayers);
-      //   }
-      // }
+      this.previousX = Math.round(this.me.x);
+      this.previousY = Math.round(this.me.y);
     }
   }
 }

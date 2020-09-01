@@ -45,10 +45,10 @@ class Physics extends planck.World {
     db.ref(`games/${this.gameId}`).set({});
   }
 
-  addUser(x, y, userName) {
+  async addUser(x, y, userName) {
     // make new user in DB
     const id = db.ref(`games/${this.gameId}/users`).push().key;
-    db.ref(`games/${this.gameId}/users/${id}`).set({
+    await db.ref(`games/${this.gameId}/users/${id}`).set({
       x,
       y,
       bodyAngle: 0,
@@ -220,6 +220,20 @@ class Physics extends planck.World {
     //   );
     //   userMove.set({ waiting: true });
     // }
+  }
+
+  puttUser2(userId, x, y) {
+    const user = this.users[userId];
+    const pos = user.getPosition();
+
+    if (user) {
+      console.log('impulse applied to', user.getUserData().userName);
+      user.applyLinearImpulse(
+        planck.Vec2(x, y),
+        planck.Vec2(pos.x, pos.y).mul(worldScale),
+        true
+      );
+    }
   }
 
   update() {

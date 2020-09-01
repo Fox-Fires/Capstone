@@ -58,13 +58,13 @@ app.post('/player', (req, res) => {
     });
 });
 
-app.post('/game', (req, res) => {
+app.post('/game', async (req, res) => {
   if (!game) {
     game = new Physics();
     game.loadLevel(barriers.test);
     game.startGame();
   }
-  const newUser = game.addUser(120, 120, req.body.userName);
+  const newUser = await game.addUser(200, 200, req.body.userName);
   const userId = newUser.getUserData().id;
   const gameId = game.gameId;
   res.json({ userId, gameId });
@@ -74,6 +74,25 @@ app.delete('/game', (req, res) => {
   const { userId, gameId } = req.body;
   game.removeUser(userId);
   res.sendStatus(200);
+});
+
+app.put('/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const { x, y } = req.body;
+
+  if (game) {
+    game.puttUser2(userId, x, y);
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+exports.putt = functions.https.onCall((data, context) => {
+  // extract data
+  const { userId, x, y } = data;
+  // putt ball
+  game.puttUser2(userId, x, y);
 });
 
 exports.api = functions.https.onRequest(app);
