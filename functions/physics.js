@@ -153,19 +153,23 @@ class Physics extends planck.World {
     this.puttUser(userId);
 
     // only update if user has moved since last update
-    if (pos.x !== prevX || pos.y !== prevY || bodyAngle !== prevAng) {
+    if (
+      Math.round(pos.x) !== prevX ||
+      Math.round(pos.y) !== prevY ||
+      Math.round(bodyAngle) !== prevAng
+    ) {
       db.ref(`games/${gameId}/users/${userId}`).set({
-        x: pos.x * worldScale,
-        y: pos.y * worldScale,
-        bodyAngle: bodyAngle,
+        x: Math.round(pos.x) * worldScale,
+        y: Math.round(pos.y) * worldScale,
+        bodyAngle: Math.round(bodyAngle),
       });
 
       // update prev x and y
       user.setUserData({
         ...userData,
-        prevX: pos.x,
-        prevY: pos.y,
-        prevAng: bodyAngle,
+        prevX: Math.round(pos.x),
+        prevY: Math.round(pos.y),
+        prevAng: Math.round(bodyAngle),
       });
     }
   }
