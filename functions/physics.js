@@ -11,6 +11,11 @@ const {
 } = require('./constants');
 const { db } = require('./admin');
 
+// convenient lil func
+const round = (dec) => {
+  return parseFloat(dec.toFixed(2));
+};
+
 // class Physics {
 class Physics extends planck.World {
   constructor(config) {
@@ -154,22 +159,22 @@ class Physics extends planck.World {
 
     // only update if user has moved since last update
     if (
-      Math.round(pos.x) !== prevX ||
-      Math.round(pos.y) !== prevY ||
-      Math.round(bodyAngle) !== prevAng
+      round(pos.x) !== prevX ||
+      round(pos.y) !== prevY ||
+      round(bodyAngle) !== prevAng
     ) {
       db.ref(`games/${gameId}/users/${userId}`).set({
-        x: Math.round(pos.x) * worldScale,
-        y: Math.round(pos.y) * worldScale,
-        bodyAngle: Math.round(bodyAngle),
+        x: round(pos.x) * worldScale,
+        y: round(pos.y) * worldScale,
+        bodyAngle: round(bodyAngle),
       });
 
       // update prev x and y
       user.setUserData({
         ...userData,
-        prevX: Math.round(pos.x),
-        prevY: Math.round(pos.y),
-        prevAng: Math.round(bodyAngle),
+        prevX: round(pos.x),
+        prevY: round(pos.y),
+        prevAng: round(bodyAngle),
       });
     }
   }
