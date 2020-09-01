@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Physics } = require('./physics');
 const cors = require('cors');
-const { barriers } = require('./constants');
+const { barriers,holeCoordinate } = require('./constants');
 
 // admin.initializeApp();
 
@@ -62,6 +62,7 @@ app.post('/game', async (req, res) => {
   if (!game) {
     game = new Physics();
     game.loadLevel(barriers.test);
+    game.addHole([300,300])
     game.startGame();
   }
   const newUser = await game.addUser(200, 200, req.body.userName);

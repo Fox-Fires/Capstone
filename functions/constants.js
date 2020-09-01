@@ -30,11 +30,15 @@ exports.railFixtureDef = {
 };
 
 exports.bHoleDef = {
-  friction: 0.1,
-  restitution: 0.09,
   isSensor: true,
   userData: "hole"
 }
+
+exports.bHoleMassData = {
+  mass: 1,
+  center: Vec2(),
+  I: 1,
+};
 
 exports.railMassData = {
   mass: 1,
@@ -58,3 +62,7 @@ const test = [
 exports.barriers = {
   test,
 };
+
+// in the form of [x,y]
+exports.holeCoordinate = [500,500]
+

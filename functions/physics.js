@@ -1,6 +1,7 @@
 const planck = require('planck-js');
 const {
   bHoleDef,
+  bHoleMassData,
   ballBodyDef,
   ballFixtureDef,
   ballMassData,
@@ -37,6 +38,23 @@ class Physics extends planck.World {
   startGame() {
     // update physics engine 60 time per second
     this.timer = setInterval(this.update, dt);
+    this.on("post-solve", this.landInHole);
+  }
+
+  //Land in hole call back for collision
+  landInHole(contact){
+    const fixtureA = contact.getFixtureA();
+    const fixtureB = contact.getFixtureB();
+    console.log(fixtureA.getUserData(),fixtureB.getUserData())
+    const hole = (fixtureA.getUserData()===bHoleDef.userData && fixtureA.getBody())||
+      (fixtureB.getUserData()===bHoleDef.userData &&fixtureB.getBody())
+    const ball = (fixtureA.getUserData()===ballFixtureDef.userData && fixtureA.getBody()) ||
+      (fixtureB.getUserData()===ballFixtureDef.userData && fixtureB.getBody())
+    if(hole && ball){
+      //Destroy planck body
+      this.destroyBody(ball);
+      //Destroy corresponding user in database
+    }
   }
 
   endGame() {
@@ -135,18 +153,21 @@ class Physics extends planck.World {
     return barrier;
   }
 
-  //Add hole ie: the goal
-  addHole(x,y){
+  //Add hole ie: the goal   hole is in the form [x,y]
+  addHole(holeCoordinate){
     const hole = this.createBody()
     hole.createFixture(
-      planck.Circle(30/worldScale),
+      planck.Circle(3000/worldScale),
       bHoleDef
     );
-    hole.setPosition(planck.Vec2(x / worldScale, y / worldScale))
+    hole.setPosition(planck.Vec2(holeCoordinate[0] / worldScale, holeCoordinate[1] / worldScale))
+    hole.setMassData(bHoleMassData);
+
     //set user data
     hole.setUserData({
       type: 'hole',
     })
+    console.log("addHole userdata:", hole.getUserData(),hole.getPosition());
     this.hole = hole;
     return hole
   }
