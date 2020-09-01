@@ -30,7 +30,12 @@ export default class Game extends Phaser.Scene {
   }
   async preload() {
     try {
+      this.load.image("Grass5", "./assets/grassets/grass05.png");
       this.load.image("Gerg", "./assets/Gerg.png");
+      this.load.image("Fire", "./assets/Fire Nation.png");
+      this.load.image("Water", "./assets/Water Tribe.png");
+      this.load.image("Earth", "./assets/Earth Kingdom.png");
+      this.load.image("Air", "./assets/Air Nomads.png");
       const loadedData = JSON.parse(localStorage.getItem("User-form"));
       const data = await axios.post(
         "http://localhost:5001/capstonegolf-67769/us-central1/api/game",
@@ -95,6 +100,12 @@ export default class Game extends Phaser.Scene {
       isSensor: true,
       userData: "rail",
     };
+    let background1 = this.add.image(512 / 2, 512 / 2, "Grass5");
+    let background2 = this.add.image(512, 512 / 2, "Grass5");
+    let background3 = this.add.image(512 / 2, 512, "Grass5");
+    let background4 = this.add.image(512, 512, "Grass5");
+    background3.setCrop(0, 0, background3.width, 320);
+    background4.setCrop(0, 0, background4.width, 320);
 
     this.world.on("post-solve", (contact) => {
       const fixtureA = contact.getFixtureA();
@@ -160,9 +171,7 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
 
-        console.log(this.cameras.main.zoom);
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
-          console.log("divide line zoom scale");
           this.clicked = true;
           // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
           // console.log("point xy", pointer.x, pointer.y);
@@ -247,14 +256,21 @@ export default class Game extends Phaser.Scene {
       center: planck.Vec2(),
 
       // I have to say I do not know the meaning of this "I", but if you set it to zero, bodies won't rotate
-      I: 0,
+      I: 1,
     });
-    var color = new Phaser.Display.Color();
-    color.random();
-    color.brighten(50).saturate(100);
-    let userData = this.add.graphics();
-    userData.fillStyle(color.color, 1);
-    userData.fillCircle(0, 0, radius);
+
+    const assetArr = ["Water", "Earth", "Fire", "Air"];
+    let userData = this.add.image(
+      posX,
+      posY,
+      assetArr[Math.round(Math.random() * assetArr.length)]
+    );
+    // var color = new Phaser.Display.Color();
+    // color.random();
+    // color.brighten(50).saturate(100);
+    // let userData = this.add.graphics();
+    // userData.fillStyle(color.color, 1);
+    // userData.fillCircle(0, 0, radius);
 
     // a body can have anything in its user data, normally it's used to store its sprite
     circle.setUserData(userData);
