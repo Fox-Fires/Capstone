@@ -29,6 +29,13 @@ exports.railFixtureDef = {
   userData: 'rail',
 };
 
+exports.bHoleDef = {
+  friction: 0.1,
+  restitution: 0.09,
+  isSensor: true,
+  userData: "hole"
+}
+
 exports.railMassData = {
   mass: 1,
   center: Vec2(),

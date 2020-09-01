@@ -1,5 +1,6 @@
 const planck = require('planck-js');
 const {
+  bHoleDef,
   ballBodyDef,
   ballFixtureDef,
   ballMassData,
@@ -23,6 +24,7 @@ class Physics extends planck.World {
     this.shouldWriteData = true;
     this.users = {};
     this.barriers = [];
+    this.hole = null;
     this.timer = null;
     this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
@@ -131,6 +133,22 @@ class Physics extends planck.World {
     this.barriers.push(barrier);
 
     return barrier;
+  }
+
+  //Add hole ie: the goal
+  addHole(x,y){
+    const hole = this.createBody()
+    hole.createFixture(
+      planck.Circle(30/worldScale),
+      bHoleDef
+    );
+    hole.setPosition(planck.Vec2(x / worldScale, y / worldScale))
+    //set user data
+    hole.setUserData({
+      type: 'hole',
+    })
+    this.hole = hole;
+    return hole
   }
 
   write() {
