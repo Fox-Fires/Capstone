@@ -38,11 +38,14 @@ class Physics extends planck.World {
   startGame() {
     // update physics engine 60 time per second
     this.timer = setInterval(this.update, dt);
-    this.on("post-solve", this.landInHole);
+    this.on("begin-contact", this.landInHole);
   }
 
   //Land in hole call back for collision
   landInHole(contact){
+    for(let b = this.getBodyList();b;b=b.getNext()){
+      console.log(b.getUserData(),b.getPosition())
+    }
     const fixtureA = contact.getFixtureA();
     const fixtureB = contact.getFixtureB();
     console.log(fixtureA.getUserData(),fixtureB.getUserData())
@@ -50,9 +53,10 @@ class Physics extends planck.World {
       (fixtureB.getUserData()===bHoleDef.userData &&fixtureB.getBody())
     const ball = (fixtureA.getUserData()===ballFixtureDef.userData && fixtureA.getBody()) ||
       (fixtureB.getUserData()===ballFixtureDef.userData && fixtureB.getBody())
+    console.log(ball.getUserData())
     if(hole && ball){
       //Destroy planck body
-      this.destroyBody(ball);
+      this.removeUser(ball.getUserData().id);
       //Destroy corresponding user in database
     }
   }
@@ -157,7 +161,7 @@ class Physics extends planck.World {
   addHole(holeCoordinate){
     const hole = this.createBody()
     hole.createFixture(
-      planck.Circle(3000/worldScale),
+      planck.Circle(100/worldScale),
       bHoleDef
     );
     hole.setPosition(planck.Vec2(holeCoordinate[0] / worldScale, holeCoordinate[1] / worldScale))
@@ -167,7 +171,7 @@ class Physics extends planck.World {
     hole.setUserData({
       type: 'hole',
     })
-    console.log("addHole userdata:", hole.getUserData(),hole.getPosition());
+
     this.hole = hole;
     return hole
   }

@@ -62,7 +62,7 @@ app.post('/game', async (req, res) => {
   if (!game) {
     game = new Physics();
     game.loadLevel(barriers.test);
-    game.addHole([300,300])
+    game.addHole(holeCoordinate)
     game.startGame();
   }
   const newUser = await game.addUser(200, 200, req.body.userName);

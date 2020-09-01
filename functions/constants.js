@@ -64,5 +64,5 @@ exports.barriers = {
 };
 
 // in the form of [x,y]
-exports.holeCoordinate = [500,500]
+exports.holeCoordinate = [300,300]
 
