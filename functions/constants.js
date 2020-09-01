@@ -18,8 +18,7 @@ exports.ballFixtureDef = {
 exports.ballMassData = {
   mass: 1,
   center: Vec2(),
-  I: 0,
-  // I: 1,
+  I: 1,
 };
 
 exports.userRadius = 15;
