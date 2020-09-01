@@ -29,6 +29,7 @@ class Physics extends planck.World {
     this.timer = null;
     this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
+    this.removeUser =this.removeUser.bind(this)
     // this.write = this.write.bind(this);
 
     // delete game instance if server unexpectedly disconnects
@@ -53,12 +54,15 @@ class Physics extends planck.World {
       (fixtureB.getUserData()===bHoleDef.userData &&fixtureB.getBody())
     const ball = (fixtureA.getUserData()===ballFixtureDef.userData && fixtureA.getBody()) ||
       (fixtureB.getUserData()===ballFixtureDef.userData && fixtureB.getBody())
-    console.log(ball.getUserData())
-    if(hole && ball){
-      //Destroy planck body
-      this.removeUser(ball.getUserData().id);
-      //Destroy corresponding user in database
-    }
+
+    const destroyUser = this.removeUser
+    setTimeout(function(){
+      if(hole && ball){
+        //Destroy planck body and remove user data
+        console.log("Should be removing")
+        destroyUser(ball.getUserData().id);
+      }
+    },1)
   }
 
   endGame() {
@@ -107,7 +111,8 @@ class Physics extends planck.World {
   removeUser(userId) {
     // remove user form engine
     const user = this.users[userId];
-    this.destroyBody(user);
+    console.log("the destroy function:",this.destroyBody);
+    console.log("Destroy body boolean:",this.destroyBody(user));
 
     // remove user from this.users
     delete this.users[userId];
@@ -161,7 +166,7 @@ class Physics extends planck.World {
   addHole(holeCoordinate){
     const hole = this.createBody()
     hole.createFixture(
-      planck.Circle(100/worldScale),
+      planck.Circle(60/worldScale),
       bHoleDef
     );
     hole.setPosition(planck.Vec2(holeCoordinate[0] / worldScale, holeCoordinate[1] / worldScale))
@@ -198,7 +203,7 @@ class Physics extends planck.World {
     const prevAng = userData.prevAng;
 
     // check for move from client
-    this.puttUser(userId);
+    // this.puttUser(userId);
 
     // only update if user has moved since last update
     if (
@@ -276,9 +281,9 @@ class Physics extends planck.World {
 
   puttUser2(userId, x, y) {
     const user = this.users[userId];
-    const pos = user.getPosition();
 
     if (user) {
+      const pos = user.getPosition();
       console.log('impulse applied to', user.getUserData().userName);
       user.applyLinearImpulse(
         planck.Vec2(x, y),
