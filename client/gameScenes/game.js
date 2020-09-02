@@ -6,6 +6,8 @@ import {
   createBox,
   createBallSprite,
   createTextButt,
+  createMenu,
+  ballSpritePicker,
 } from "./helpers";
 
 const userRadius = 15;
@@ -20,6 +22,7 @@ export default class Game extends Phaser.Scene {
     this.line1;
     this.graphics;
     this.pointer;
+    this.menu = false;
     // this.graphics = this.add.graphics({
     //   fillStyle: { color: 0xff0000 },
     // });
@@ -36,6 +39,7 @@ export default class Game extends Phaser.Scene {
   preload() {
     // try {
     this.load.image("Gerg", "./assets/Gerg.png");
+    this.load.image("golf", "./assets/golf_balls.png");
     this.load.image("Water", "./assets/Water Tribe.png");
     this.load.image("Earth", "./assets/Earth Kingdom.png");
     this.load.image("Fire", "./assets/Fire Nation.png");
@@ -127,7 +131,7 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    let scene = this;
+    let currScene = this;
     this.worldScale = 30;
     // add background
     this.add.image(512 / 2, 512 / 2, "Grass5");
@@ -139,15 +143,36 @@ export default class Game extends Phaser.Scene {
     // load me
     this.me = createBallSprite(this, 0, 0, "Gerg");
 
-    const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air"];
+    // this.game.add.group(null, "buttonsGroup", true);
+
+    const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
     this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
     this.switchSprite.on("pointerdown", function () {
-      console.log(scene);
-      scene.me.setTexture(
-        spriteArr[Math.floor(Math.random() * spriteArr.length)]
-      );
+      if (currScene.menu === false) {
+        currScene.spriteMenu = createMenu(currScene, 20, 45, 100, 255);
+        currScene.spriteWater = ballSpritePicker(currScene, 70, 70, "Water");
+        currScene.spriteEarth = ballSpritePicker(currScene, 70, 110, "Earth");
+        currScene.spriteFire = ballSpritePicker(currScene, 70, 150, "Fire");
+        currScene.spriteAir = ballSpritePicker(currScene, 70, 190, "Air");
+        currScene.spriteGerg = ballSpritePicker(currScene, 70, 230, "Gerg");
+        currScene.spriteGolf = ballSpritePicker(currScene, 70, 270, "golf");
+        currScene.menu = true;
+      } else {
+        currScene.spriteMenu.destroy();
+        currScene.spriteWater.destroy();
+        currScene.spriteEarth.destroy();
+        currScene.spriteFire.destroy();
+        currScene.spriteAir.destroy();
+        currScene.spriteGerg.destroy();
+        currScene.spriteGolf.destroy();
+        currScene.menu = false;
+      }
     });
-
+    console.log(
+      "camera w and h",
+      this.cameras.main.width,
+      this.cameras.main.height
+    );
     // add listener for new data
 
     //Pointer graphic
@@ -274,9 +299,15 @@ export default class Game extends Phaser.Scene {
     //   userData.rotation = bodyAngle;
     // }
 
-    this.switchSprite.x = 20 - (-199.9 - this.cameras.main.worldView.x);
-    this.switchSprite.y = 20 - (-99.9 - this.cameras.main.worldView.y);
-    this.switchSprite.setFontSize(20 / this.cameras.main.zoom);
+    // this.switchSprite.x = 20 - (-199.9 - this.cameras.main.worldView.x);
+    // this.switchSprite.y = 20 - (-99.9 - this.cameras.main.worldView.y);
+    // this.switchSprite.setPosition(
+    //   this.cameras.main.worldView.x + 20,
+    //   this.cameras.main.worldView.y + 20
+    // );
+
+    // this.switchSprite.setPosition(this.me.x - 400 * 0.9, this.me.y - 300 * 0.9);
+    // this.switchSprite.setFontSize(20 / this.cameras.main.zoom);
 
     //Graphics for dotted line indicator
     this.graphics.clear();

@@ -53,6 +53,30 @@ export const createTextButt = (scene, x, y, text) => {
   return button;
 };
 
+export const createMenu = (scene, x, y, w, h) => {
+  const color = new Phaser.Display.Color.ValueToColor("#FFFFFF");
+
+  const box = scene.add.graphics();
+  box.fillStyle(color.color, 1);
+  box.fillRect(x, y, w, h);
+  box.setScrollFactor(0);
+
+  return box;
+};
+
+export const ballSpritePicker = (scene, x, y, sprite) => {
+  const ball = scene.add.image(0, 0, sprite);
+  ball.setInteractive();
+  ball.setScrollFactor(0);
+  ball.on("pointerdown", function () {
+    scene.me.setTexture(sprite);
+  });
+  ball.x = x;
+  ball.y = y;
+
+  return ball;
+};
+
 export const createBox = (scene, x, y, w, h) => {
   const color = new Phaser.Display.Color();
   color.random();
