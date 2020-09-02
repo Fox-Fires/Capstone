@@ -166,7 +166,7 @@ class Physics extends planck.World {
   addHole(holeCoordinate){
     const hole = this.createBody()
     hole.createFixture(
-      planck.Circle(60/worldScale),
+      planck.Circle(1/worldScale),
       bHoleDef
     );
     hole.setPosition(planck.Vec2(holeCoordinate[0] / worldScale, holeCoordinate[1] / worldScale))
