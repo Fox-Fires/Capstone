@@ -23,16 +23,16 @@ export const createBall = (scene, x, y, r) => {
   return ball;
 };
 
-export const createHole = (scene, x, y,r) =>{
+export const createHole = (scene, x, y, r) => {
   const color = new Phaser.Display.Color();
   const hole = scene.add.graphics();
-  hole.fillStyle(color.color,1);
+  hole.fillStyle(color.color, 1);
   hole.fillCircle(0, 0, r);
   hole.x = x;
   hole.y = y;
 
   return hole;
-}
+};
 
 export const createBox = (scene, x, y, w, h) => {
   const color = new Phaser.Display.Color();
@@ -44,48 +44,4 @@ export const createBox = (scene, x, y, w, h) => {
   box.fillRect(x, y, w, h);
 
   return box;
-};
-
-export const updatePlayerPositions = (data) => {
-  console.log('top of data listener');
-  console.log('what is this?', this);
-
-  // remove players no longer in the game
-  Object.keys(this.others).forEach((userId) => {
-    if (!data[userId]) {
-      this.others[userId].destroy();
-      delete this.others[userId];
-    }
-  });
-
-  // update other players
-  Object.keys(data).forEach((userId) => {
-    // update existin player's position
-    if (this.others[userId] && userId !== this.userId) {
-      const incomingData = data[userId];
-      const player = this.others[userId];
-      player.x = incomingData.x;
-      player.y = incomingData.y;
-      player.rotation = incomingData.bodyAngle;
-
-      // add new players
-    } else if (!this.others[userId] && userId !== this.userId) {
-      const newPlayerData = data[userId];
-      const newPlayer = createBall(
-        this,
-        newPlayerData.x,
-        newPlayerData.y,
-        userRadius
-      );
-      this.others[userId] = newPlayer;
-
-      // update my position
-    } else if (userId === this.userId) {
-      const myData = data[userId];
-      console.log('here?');
-      this.me.x = myData.x;
-      this.me.y = myData.y;
-      this.me.rotation = myData.bodyAngle;
-    }
-  });
 };
