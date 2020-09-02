@@ -1,6 +1,7 @@
 import React from 'react';
 import Phaser from 'phaser';
 import Game from '../gameScenes/game';
+import GameOver from '../gameScenes/gameOver';
 
 export default class PlayGame extends React.Component {
   componentDidMount() {
@@ -12,7 +13,7 @@ export default class PlayGame extends React.Component {
       parent: 'game-view',
       'dom.createContainer': true,
       backgroundColor: '#cccccc',
-      scene: [Game],
+      scene: [Game, GameOver],
     };
     const game = new Phaser.Game(config);
   }
