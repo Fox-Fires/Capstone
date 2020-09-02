@@ -88,6 +88,17 @@ app.put('/:userId', (req, res) => {
   }
 });
 
+// listen for user deletions
+exports.deleteUser = functions.database
+  .ref('/games/{gameId}/users/{userId}')
+  // .ref('games')
+  .onDelete((snapshot, context) => {
+    const { gameId, userId } = context.params;
+    console.log(`user ${userId} left game ${gameId}`);
+
+    return Promise.resolve('deleted');
+  });
+
 exports.putt = functions.https.onCall((data, context) => {
   // extract data
   const { userId, x, y } = data;
