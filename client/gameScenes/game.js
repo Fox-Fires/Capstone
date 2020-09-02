@@ -79,13 +79,16 @@ export default class Game extends Phaser.Scene {
 
   updatePlayerPositions(data) {
     // remove players no longer in the game
-    console.log(this.others);
     Object.keys(this.others).forEach((userId) => {
       if (!data[userId]) {
         this.others[userId].destroy();
         delete this.others[userId];
       }
     });
+    //Delete 'me' if no longer in database
+    if(this.userId && data && !data[this.userId]){
+      this.me.destroy();
+    }
 
     // update other players
     Object.keys(data).forEach((userId) => {
