@@ -44,7 +44,7 @@ export default class Game extends Phaser.Scene {
         userName: loadedData.name,
       })
       .then(({ data }) => {
-        console.log("game data", data);
+        
         this.userId = data.userId;
         this.gameId = data.gameId;
         return database
@@ -54,7 +54,6 @@ export default class Game extends Phaser.Scene {
             // this.me = createBall(this, myData.x, myData.y, 15);
             this.me.x = myData.x;
             this.me.y = myData.y;
-            console.log("my data", { x: this.me.x, y: this.me.y });
           });
       })
       .then(() => {
