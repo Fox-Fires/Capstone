@@ -1,4 +1,3 @@
-import planck from 'planck-js';
 import { database } from '../../Firebase/main';
 import axios from 'axios';
 
@@ -82,7 +81,7 @@ export default class Game extends Phaser.Scene {
       }
     });
     //Delete 'me' if no longer in database
-    if(this.userId && data && !data[this.userId]){
+    if (this.userId && data && !data[this.userId]) {
       this.me.destroy();
     }
 
