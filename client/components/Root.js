@@ -9,7 +9,6 @@ export default class Root extends React.Component {
     this.state = {
       name: '',
       playing: false,
-      timer: 0,
     };
     this.handleChange = this.handleChange.bind(this);
     this.handlePlay = this.handlePlay.bind(this);
@@ -52,7 +51,6 @@ export default class Root extends React.Component {
     return (
       <div>
         <h1>Tentative Golf Title</h1>
-        <h3>{`timer: ${this.state.timer}`}</h3>
         {this.state.playing !== true ? (
           <UserForm
             {...this.state}
