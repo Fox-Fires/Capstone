@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 const userRadius = 15; // pixels
 
 export const makePlayers = (scene, data) => {
@@ -23,6 +23,36 @@ export const createBall = (scene, x, y, r) => {
   return ball;
 };
 
+export const createBallSprite = (scene, x, y, sprite) => {
+  const ball = scene.add.image(0, 0, sprite);
+
+  ball.x = x;
+  ball.y = y;
+
+  return ball;
+};
+
+export const createTextButt = (scene, x, y, text) => {
+  const button = scene.add
+    .text(0, 0, text)
+    .setFontSize(20)
+    .setFontFamily("Trajan")
+    .setColor("black")
+    .setScrollFactor(0)
+    .setInteractive();
+  button.on("pointerover", function () {
+    button.setColor("white");
+  });
+  button.on("pointerout", function () {
+    button.setColor("black");
+  });
+
+  button.x = x;
+  button.y = y;
+
+  return button;
+};
+
 export const createBox = (scene, x, y, w, h) => {
   const color = new Phaser.Display.Color();
   color.random();
@@ -36,8 +66,8 @@ export const createBox = (scene, x, y, w, h) => {
 };
 
 export const updatePlayerPositions = (data) => {
-  console.log('top of data listener');
-  console.log('what is this?', this);
+  console.log("top of data listener");
+  console.log("what is this?", this);
 
   // remove players no longer in the game
   Object.keys(this.others).forEach((userId) => {
@@ -71,7 +101,7 @@ export const updatePlayerPositions = (data) => {
       // update my position
     } else if (userId === this.userId) {
       const myData = data[userId];
-      console.log('here?');
+      console.log("here?");
       this.me.x = myData.x;
       this.me.y = myData.y;
       this.me.rotation = myData.bodyAngle;

@@ -1,8 +1,12 @@
-import planck from "planck-js";
 import { database } from "../../Firebase/main";
 import axios from "axios";
 
-import { createBall, createBox } from "./helpers";
+import {
+  createBall,
+  createBox,
+  createBallSprite,
+  createTextButt,
+} from "./helpers";
 
 const userRadius = 15;
 
@@ -32,6 +36,12 @@ export default class Game extends Phaser.Scene {
   preload() {
     // try {
     this.load.image("Gerg", "./assets/Gerg.png");
+    this.load.image("Water", "./assets/Water Tribe.png");
+    this.load.image("Earth", "./assets/Earth Kingdom.png");
+    this.load.image("Fire", "./assets/Fire Nation.png");
+    this.load.image("Air", "./assets/Air Nomads.png");
+    this.load.image("Grass5", "./assets/grassets/grass05.png");
+
     const loadedData = JSON.parse(localStorage.getItem("User-form"));
     const apiRoute =
       "http://localhost:5001/capstonegolf-67769/us-central1/api/game";
@@ -117,14 +127,26 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    let scene = this;
     this.worldScale = 30;
+    // add background
+    this.add.image(512 / 2, 512 / 2, "Grass5");
     createBox(this, 0, 0, 800, 40); // top
     createBox(this, 0, 560, 800, 40); // bottom
     createBox(this, 0, 0, 40, 600); // left
     createBox(this, 760, 0, 40, 600); // right
 
     // load me
-    this.me = createBall(this, 0, 0, userRadius);
+    this.me = createBallSprite(this, 0, 0, "Gerg");
+
+    const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air"];
+    this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
+    this.switchSprite.on("pointerdown", function () {
+      console.log(scene);
+      scene.me.setTexture(
+        spriteArr[Math.floor(Math.random() * spriteArr.length)]
+      );
+    });
 
     // add listener for new data
 
@@ -137,7 +159,6 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
-
         // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
           this.clicked = true;
@@ -198,14 +219,34 @@ export default class Game extends Phaser.Scene {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
+          // switchSprite.x -= (deltaY / Math.abs(deltaY)) * (800 / 10);
+          // switchSprite.y -= (deltaY / Math.abs(deltaY)) * (600 / 10);
         }
       } else if (this.cameras.main.zoom >= 1.6) {
         if (deltaY > 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
+          // switchSprite.x -= (deltaY / Math.abs(deltaY)) * (800 / 10);
+          // switchSprite.y -= (deltaY / Math.abs(deltaY)) * (600 / 10);
         }
       } else {
         this.cameras.main.zoom -= deltaY * 0.001;
+        // switchSprite.x -= (deltaY / Math.abs(deltaY)) * (800 / 10);
+        // switchSprite.y -= (deltaY / Math.abs(deltaY)) * (600 / 10);
       }
+      // x -200 y -100
+      // console.log("delta camera text", switchSprite);
+      // console.log("x, y", switchSprite.x, switchSprite.y);
+      // console.log("camera", this.cameras.main);
+      // console.log(
+      //   "camera worldview x y",
+      //   this.cameras.main.worldView.x,
+      //   this.cameras.main.worldView.y
+      // );
+      // console.log(
+      //   "neg diff",
+      //   -(-199.9 - this.cameras.main.worldView.x),
+      //   -(-99.9 - this.cameras.main.worldView.y)
+      // );
     });
   }
 
@@ -232,6 +273,10 @@ export default class Game extends Phaser.Scene {
     //   userData.y = bodyPosition.y * this.worldScale;
     //   userData.rotation = bodyAngle;
     // }
+
+    this.switchSprite.x = 20 - (-199.9 - this.cameras.main.worldView.x);
+    this.switchSprite.y = 20 - (-99.9 - this.cameras.main.worldView.y);
+    this.switchSprite.setFontSize(20 / this.cameras.main.zoom);
 
     //Graphics for dotted line indicator
     this.graphics.clear();
