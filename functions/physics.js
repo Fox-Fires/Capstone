@@ -30,6 +30,7 @@ class Physics extends planck.World {
     this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
     this.removeUser =this.removeUser.bind(this)
+    this.winnerPlace = 1;
     // this.write = this.write.bind(this);
 
     // delete game instance if server unexpectedly disconnects
@@ -44,23 +45,28 @@ class Physics extends planck.World {
 
   //Land in hole call back for collision
   landInHole(contact){
-    for(let b = this.getBodyList();b;b=b.getNext()){
-      console.log(b.getUserData(),b.getPosition())
-    }
     const fixtureA = contact.getFixtureA();
     const fixtureB = contact.getFixtureB();
-    console.log(fixtureA.getUserData(),fixtureB.getUserData())
     const hole = (fixtureA.getUserData()===bHoleDef.userData && fixtureA.getBody())||
       (fixtureB.getUserData()===bHoleDef.userData &&fixtureB.getBody())
     const ball = (fixtureA.getUserData()===ballFixtureDef.userData && fixtureA.getBody()) ||
       (fixtureB.getUserData()===ballFixtureDef.userData && fixtureB.getBody())
 
-    const destroyUser = this.removeUser
+    const removeUser = this.removeUser
+    const place = this.winnerPlace
+    //Send place data to game instance in database
+    if(hole && ball){
+      db.ref(`games/${this.gameId}/winners/${ball.getUserData().id}`).set({
+        place:place,
+        username:ball.getUserData().userName
+      })
+      this.winnerPlace++;
+    }
+    //Need a setTimeout to prevent termination attempt of an object while 'locked' (will fail to remove ball)
     setTimeout(function(){
       if(hole && ball){
         //Destroy planck body and remove user data
-        console.log("Should be removing")
-        destroyUser(ball.getUserData().id);
+        removeUser(ball.getUserData().id);
       }
     },1)
   }
@@ -111,8 +117,7 @@ class Physics extends planck.World {
   removeUser(userId) {
     // remove user form engine
     const user = this.users[userId];
-    console.log("the destroy function:",this.destroyBody);
-    console.log("Destroy body boolean:",this.destroyBody(user));
+    this.destroyBody(user);
 
     // remove user from this.users
     delete this.users[userId];
@@ -254,17 +259,6 @@ class Physics extends planck.World {
             planck.Vec2(pos.x * worldScale, pos.y * worldScale),
             true
           );
-
-          // clear move in db
-          db.ref(`games/${this.gameId}/users/${userId}/move`).set(
-            { what: 'the', waiting: true },
-            function (error) {
-              if (error) {
-              } else {
-                console.log('Applied Move');
-              }
-            }
-          );
         }
       }
     );
@@ -284,7 +278,6 @@ class Physics extends planck.World {
 
     if (user) {
       const pos = user.getPosition();
-      console.log('impulse applied to', user.getUserData().userName);
       user.applyLinearImpulse(
         planck.Vec2(x, y),
         planck.Vec2(pos.x, pos.y).mul(worldScale),
