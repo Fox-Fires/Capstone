@@ -15,10 +15,6 @@ export default class Game extends Phaser.Scene {
     this.line1;
     this.graphics;
     this.pointer;
-    // this.graphics = this.add.graphics({
-    //   fillStyle: { color: 0xff0000 },
-    // });
-    // firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
@@ -29,7 +25,6 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
-    // try {
     this.load.image('Gerg', './assets/Gerg.png');
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
     const apiRoute =
@@ -59,7 +54,6 @@ export default class Game extends Phaser.Scene {
       })
       .then(() => {
         console.log(`getting ready to bind to game ${this.gameId}`);
-        // const f = updatePlayerPositions.bind(this);
         return database
           .ref(`games/${this.gameId}/users`)
           .on('value', (snapshot) => {
@@ -132,8 +126,6 @@ export default class Game extends Phaser.Scene {
     // load me
     this.me = createBall(this, 0, 0, userRadius);
 
-    // add listener for new data
-
     //Pointer graphic
     this.graphics = this.add.graphics({
       fillStyle: { color: 0xff0000 },
@@ -144,11 +136,8 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
 
-        // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
           this.clicked = true;
-          // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
-          // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
             this.me.x,
             this.me.y,
@@ -162,7 +151,6 @@ export default class Game extends Phaser.Scene {
             this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
           }
         }
-        // console.log(this.clicked);
       },
       this
     );
@@ -171,7 +159,6 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
-          // console.log(" while clicked pointer", this.pointer);
         }
       },
       this
@@ -182,11 +169,6 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
         if (this.clicked) {
-          // this.me.applyLinearImpulse(
-          //   planck.Vec2(difx / 2, dify / 2),
-          //   planck.Vec2(this.me.x, this.me.y),
-          //   true
-          // );
           axios.put(
             `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
             { x: difx / 2, y: dify / 2 }
@@ -216,29 +198,6 @@ export default class Game extends Phaser.Scene {
   }
 
   update() {
-    // advance the simulation by 1/60 seconds
-    // this.world.step(1 / 60);
-
-    // crearForces  method should be added at the end on each step
-    // this.world.clearForces();
-
-    // iterate through all bodies
-    // for (let b = this.world.getBodyList(); b; b = b.getNext()) {
-    //   // get body position
-    //   let bodyPosition = b.getPosition();
-
-    //   // get body angle, in radians
-    //   let bodyAngle = b.getAngle();
-
-    //   // get body user data, the graphics object
-    //   let userData = b.getUserData();
-
-    //   // adjust graphic object position and rotation
-    //   userData.x = bodyPosition.x * this.worldScale;
-    //   userData.y = bodyPosition.y * this.worldScale;
-    //   userData.rotation = bodyAngle;
-    // }
-
     //Graphics for dotted line indicator
     this.graphics.clear();
     if (this.clicked) {
