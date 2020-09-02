@@ -2,7 +2,7 @@ import planck from 'planck-js';
 import { database } from '../../Firebase/main';
 import axios from 'axios';
 
-import { createBall, createBox } from './helpers';
+import { createBall, createBox, createHole } from './helpers';
 
 const userRadius = 15;
 
@@ -41,7 +41,6 @@ export default class Game extends Phaser.Scene {
         userName: loadedData.name,
       })
       .then(({ data }) => {
-        console.log('game data', data);
         this.userId = data.userId;
         this.gameId = data.gameId;
         return database
@@ -51,7 +50,6 @@ export default class Game extends Phaser.Scene {
             console.log('What is my data?', myData);
             this.me.x = myData.x;
             this.me.y = myData.y;
-            // console.log('my data', { x: this.me.x, y: this.me.y });
           });
       })
       .then(() => {
@@ -77,6 +75,7 @@ export default class Game extends Phaser.Scene {
 
   updatePlayerPositions(data) {
     // remove players no longer in the game
+    console.log(this.others);
     Object.keys(this.others).forEach((userId) => {
       if (!data[userId]) {
         this.others[userId].destroy();
@@ -122,6 +121,7 @@ export default class Game extends Phaser.Scene {
     createBox(this, 0, 560, 800, 40); // bottom
     createBox(this, 0, 0, 40, 600); // left
     createBox(this, 760, 0, 40, 600); // right
+    createHole(this, 300, 300, 15); //The hole
 
     // load me
     this.me = createBall(this, 0, 0, userRadius);

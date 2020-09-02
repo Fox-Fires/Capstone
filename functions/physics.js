@@ -1,5 +1,7 @@
 const planck = require('planck-js');
 const {
+  bHoleDef,
+  bHoleMassData,
   ballBodyDef,
   ballFixtureDef,
   ballMassData,
@@ -23,9 +25,11 @@ class Physics extends planck.World {
     this.shouldWriteData = true;
     this.users = {};
     this.barriers = [];
+    this.hole = null;
     this.timer = null;
     this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
+    this.removeUser =this.removeUser.bind(this)
     // this.write = this.write.bind(this);
 
     // delete game instance if server unexpectedly disconnects
@@ -35,6 +39,30 @@ class Physics extends planck.World {
   startGame() {
     // update physics engine 60 time per second
     this.timer = setInterval(this.update, dt);
+    this.on("begin-contact", this.landInHole);
+  }
+
+  //Land in hole call back for collision
+  landInHole(contact){
+    for(let b = this.getBodyList();b;b=b.getNext()){
+      console.log(b.getUserData(),b.getPosition())
+    }
+    const fixtureA = contact.getFixtureA();
+    const fixtureB = contact.getFixtureB();
+    console.log(fixtureA.getUserData(),fixtureB.getUserData())
+    const hole = (fixtureA.getUserData()===bHoleDef.userData && fixtureA.getBody())||
+      (fixtureB.getUserData()===bHoleDef.userData &&fixtureB.getBody())
+    const ball = (fixtureA.getUserData()===ballFixtureDef.userData && fixtureA.getBody()) ||
+      (fixtureB.getUserData()===ballFixtureDef.userData && fixtureB.getBody())
+
+    const destroyUser = this.removeUser
+    setTimeout(function(){
+      if(hole && ball){
+        //Destroy planck body and remove user data
+        console.log("Should be removing")
+        destroyUser(ball.getUserData().id);
+      }
+    },1)
   }
 
   endGame() {
@@ -83,7 +111,8 @@ class Physics extends planck.World {
   removeUser(userId) {
     // remove user form engine
     const user = this.users[userId];
-    this.destroyBody(user);
+    console.log("the destroy function:",this.destroyBody);
+    console.log("Destroy body boolean:",this.destroyBody(user));
 
     // remove user from this.users
     delete this.users[userId];
@@ -133,6 +162,25 @@ class Physics extends planck.World {
     return barrier;
   }
 
+  //Add hole ie: the goal   hole is in the form [x,y]
+  addHole(holeCoordinate){
+    const hole = this.createBody()
+    hole.createFixture(
+      planck.Circle(1/worldScale),
+      bHoleDef
+    );
+    hole.setPosition(planck.Vec2(holeCoordinate[0] / worldScale, holeCoordinate[1] / worldScale))
+    hole.setMassData(bHoleMassData);
+
+    //set user data
+    hole.setUserData({
+      type: 'hole',
+    })
+
+    this.hole = hole;
+    return hole
+  }
+
   write() {
     // const data = {};
     // write only users to db
@@ -155,7 +203,7 @@ class Physics extends planck.World {
     const prevAng = userData.prevAng;
 
     // check for move from client
-    this.puttUser(userId);
+    // this.puttUser(userId);
 
     // only update if user has moved since last update
     if (
@@ -233,9 +281,9 @@ class Physics extends planck.World {
 
   puttUser2(userId, x, y) {
     const user = this.users[userId];
-    const pos = user.getPosition();
 
     if (user) {
+      const pos = user.getPosition();
       console.log('impulse applied to', user.getUserData().userName);
       user.applyLinearImpulse(
         planck.Vec2(x, y),

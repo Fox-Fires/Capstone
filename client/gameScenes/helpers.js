@@ -23,6 +23,17 @@ export const createBall = (scene, x, y, r) => {
   return ball;
 };
 
+export const createHole = (scene, x, y,r) =>{
+  const color = new Phaser.Display.Color();
+  const hole = scene.add.graphics();
+  hole.fillStyle(color.color,1);
+  hole.fillCircle(0, 0, r);
+  hole.x = x;
+  hole.y = y;
+
+  return hole;
+}
+
 export const createBox = (scene, x, y, w, h) => {
   const color = new Phaser.Display.Color();
   color.random();
