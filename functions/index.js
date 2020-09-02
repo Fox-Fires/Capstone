@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Physics } = require('./physics');
 const cors = require('cors');
-const { barriers,holeCoordinate } = require('./constants');
+const { barriers, holeCoordinate } = require('./constants');
 
 // admin.initializeApp();
 
@@ -10,71 +10,21 @@ const express = require('express');
 const app = express();
 
 let game = undefined;
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorlds = functions.https.onRequest((request, response) => {
-  functions.logger.info('Hello logs!', { structuredData: true });
-  response.send('Hello from Firebase!');
-});
 
 //Helps avoid cors mismatch between client and server.
 app.use(cors({ origin: true }));
-
-app.get('/player', (req, res) => {
-  admin
-    .firestore()
-    .collection('Player')
-    .get()
-    .then((data) => {
-      let test = [];
-      data.forEach((doc) => {
-        test.push({
-          playerId: doc.id,
-          x: doc.data().x,
-          y: doc.data().y,
-        });
-      });
-      return res.json(test);
-    })
-    .catch((err) => console.error(err));
-});
-
-app.post('/player', (req, res) => {
-  const newPlayer = {
-    x: req.body.x,
-    y: req.body.y,
-  };
-  admin
-    .firestore()
-    .collection('Player')
-    .add(newPlayer)
-    .then((doc) => {
-      res.json({ message: `document ${doc.id} created successfully` });
-    })
-    .catch((err) => {
-      res.status(500).json({ error: 'something went wrong' });
-      console.error(err);
-    });
-});
 
 app.post('/game', async (req, res) => {
   if (!game) {
     game = new Physics();
     game.loadLevel(barriers.test);
-    game.addHole(holeCoordinate)
+    game.addHole(holeCoordinate);
     game.startGame();
   }
   const newUser = await game.addUser(200, 200, req.body.userName);
   const userId = newUser.getUserData().id;
   const gameId = game.gameId;
   res.json({ userId, gameId });
-});
-
-app.delete('/game', (req, res) => {
-  const { userId, gameId } = req.body;
-  game.removeUser(userId);
-  res.sendStatus(200);
 });
 
 app.put('/:userId', (req, res) => {
@@ -89,11 +39,14 @@ app.put('/:userId', (req, res) => {
   }
 });
 
-exports.putt = functions.https.onCall((data, context) => {
-  // extract data
-  const { userId, x, y } = data;
-  // putt ball
-  game.puttUser2(userId, x, y);
-});
+// listen for user deletions from db
+exports.deleteUser = functions.database
+  .ref('/games/{gameId}/users/{userId}')
+  .onDelete((snapshot, context) => {
+    const { gameId, userId } = context.params;
+    console.log(`user ${userId} left game ${gameId}`);
+
+    return Promise.resolve('deleted');
+  });
 
 exports.api = functions.https.onRequest(app);
