@@ -1,15 +1,18 @@
-import planck from 'planck-js';
-import { database } from '../../Firebase/main';
-import axios from 'axios';
+import planck from "planck-js";
+import { database } from "../../Firebase/main";
+import axios from "axios";
+
 
 import { createBall, createBox, createHole } from './helpers';
+
+
 
 const userRadius = 15;
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: 'Game',
+      key: "Game",
     });
     this.me = null;
     this.clicked = false;
@@ -31,27 +34,27 @@ export default class Game extends Phaser.Scene {
 
   preload() {
     // try {
-    this.load.image('Gerg', './assets/Gerg.png');
-    const loadedData = JSON.parse(localStorage.getItem('User-form'));
+    this.load.image("Gerg", "./assets/Gerg.png");
+    const loadedData = JSON.parse(localStorage.getItem("User-form"));
     const apiRoute =
-      'http://localhost:5001/capstonegolf-67769/us-central1/api/game';
+      "http://localhost:5001/capstonegolf-67769/us-central1/api/game";
 
     const { data } = axios
       .post(apiRoute, {
         userName: loadedData.name,
       })
       .then(({ data }) => {
-        console.log('game data', data);
+        console.log("game data", data);
         this.userId = data.userId;
         this.gameId = data.gameId;
         return database
           .ref(`games/${this.gameId}/users/${this.userId}`)
-          .once('value', (snapshot) => {
+          .once("value", (snapshot) => {
             const myData = snapshot.val();
             // this.me = createBall(this, myData.x, myData.y, 15);
             this.me.x = myData.x;
             this.me.y = myData.y;
-            console.log('my data', { x: this.me.x, y: this.me.y });
+            console.log("my data", { x: this.me.x, y: this.me.y });
           });
       })
       .then(() => {
@@ -65,12 +68,12 @@ export default class Game extends Phaser.Scene {
         // const f = updatePlayerPositions.bind(this);
         return database
           .ref(`games/${this.gameId}/users`)
-          .on('value', (snapshot) => {
+          .on("value", (snapshot) => {
             this.updatePlayerPositions(snapshot.val());
           });
       })
       .then(() => {
-        console.log('Done loading');
+        console.log("Done loading");
       })
       .catch(console.error);
   }
@@ -98,7 +101,7 @@ export default class Game extends Phaser.Scene {
         // add new players
       } else if (!this.others[userId] && userId !== this.userId) {
         const newPlayerData = data[userId];
-        console.log('new player data', newPlayerData);
+        console.log("new player data", newPlayerData);
         const newPlayer = createBall(
           this,
           newPlayerData.x,
@@ -135,21 +138,21 @@ export default class Game extends Phaser.Scene {
       fillStyle: { color: 0xff0000 },
     });
     this.input.on(
-      'pointerdown',
+      "pointerdown",
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
 
         // console.log("down, pointer, ball", pointer, this.me.m_userData);
-        if (Math.hypot(difx, dify) <= 15) {
+        if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
           this.clicked = true;
           // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
           // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
             this.me.x,
             this.me.y,
-            this.me.x - difx,
-            this.me.y - dify
+            this.me.x - difx / this.cameras.main.zoom,
+            this.me.y - dify / this.cameras.main.zoom
           );
           const points = this.line1.getPoints(10);
           for (let i = 0; i < points.length; i++) {
@@ -163,7 +166,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      'pointermove',
+      "pointermove",
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
@@ -173,7 +176,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      'pointerup',
+      "pointerup",
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
@@ -196,7 +199,7 @@ export default class Game extends Phaser.Scene {
     // camera
     // breaking over here
     this.cameras.main.startFollow(this.me);
-    this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
+    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
@@ -244,8 +247,8 @@ export default class Game extends Phaser.Scene {
         this.line1.setTo(
           this.me.x,
           this.me.y,
-          this.me.x - difx,
-          this.me.y - dify
+          this.me.x - difx / this.cameras.main.zoom,
+          this.me.y - dify / this.cameras.main.zoom
         );
       }
       const points = this.line1.getPoints(10);
