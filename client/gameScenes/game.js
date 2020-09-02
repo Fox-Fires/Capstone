@@ -73,48 +73,52 @@ export default class Game extends Phaser.Scene {
   }
 
   updatePlayerPositions(data) {
-    // remove players no longer in the game
-    Object.keys(this.others).forEach((userId) => {
-      if (!data[userId]) {
-        this.others[userId].destroy();
-        delete this.others[userId];
+    if (data) {
+      // remove players no longer in the game
+      Object.keys(this.others).forEach((userId) => {
+        if (!data[userId]) {
+          this.others[userId].destroy();
+          delete this.others[userId];
+        }
+      });
+      //Delete 'me' if no longer in database
+      if (this.userId && data && !data[this.userId]) {
+        this.me.destroy();
       }
-    });
-    //Delete 'me' if no longer in database
-    if (this.userId && data && !data[this.userId]) {
-      this.me.destroy();
+
+      // update other players
+      Object.keys(data).forEach((userId) => {
+        // update existin player's position
+        if (this.others[userId] && userId !== this.userId) {
+          const incomingData = data[userId];
+          const player = this.others[userId];
+          player.x = incomingData.x;
+          player.y = incomingData.y;
+          player.rotation = incomingData.bodyAngle;
+
+          // add new players
+        } else if (!this.others[userId] && userId !== this.userId) {
+          const newPlayerData = data[userId];
+          console.log('new player data', newPlayerData);
+          const newPlayer = createBall(
+            this,
+            newPlayerData.x,
+            newPlayerData.y,
+            userRadius
+          );
+          this.others[userId] = newPlayer;
+
+          // update my position
+        } else if (userId === this.userId) {
+          const myData = data[userId];
+          this.me.x = myData.x;
+          this.me.y = myData.y;
+          this.me.rotation = myData.bodyAngle;
+        }
+      });
+    } else {
+      this.scene.start('GameOver', { gameId: this.gameId });
     }
-
-    // update other players
-    Object.keys(data).forEach((userId) => {
-      // update existin player's position
-      if (this.others[userId] && userId !== this.userId) {
-        const incomingData = data[userId];
-        const player = this.others[userId];
-        player.x = incomingData.x;
-        player.y = incomingData.y;
-        player.rotation = incomingData.bodyAngle;
-
-        // add new players
-      } else if (!this.others[userId] && userId !== this.userId) {
-        const newPlayerData = data[userId];
-        console.log('new player data', newPlayerData);
-        const newPlayer = createBall(
-          this,
-          newPlayerData.x,
-          newPlayerData.y,
-          userRadius
-        );
-        this.others[userId] = newPlayer;
-
-        // update my position
-      } else if (userId === this.userId) {
-        const myData = data[userId];
-        this.me.x = myData.x;
-        this.me.y = myData.y;
-        this.me.rotation = myData.bodyAngle;
-      }
-    });
   }
 
   create() {
