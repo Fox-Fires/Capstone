@@ -22,6 +22,7 @@ export default class Game extends Phaser.Scene {
     this.allPlayers = {};
     this.updatePlayerPositions = this.updatePlayerPositions.bind(this);
     this.others = {};
+    this.listener = null;
 
     this.apiRoute =
       location.hostname === 'localhost'
@@ -55,22 +56,14 @@ export default class Game extends Phaser.Scene {
             this.updatePlayerPositions(snapshot.val());
           });
       })
-      .then(() => {
+      .then((listener) => {
+        this.listener = listener;
+
         return database
           .ref(`games/${this.gameId}/users/${this.userId}`)
           .onDisconnect()
           .set({});
       })
-
-      // .then(() => {
-      //   console.log(`getting ready to bind to game ${this.gameId}`);
-      // const f = updatePlayerPositions.bind(this);
-      // return database
-      //   .ref(`games/${this.gameId}/users`)
-      //   .on("value", (snapshot) => {
-      //     this.updatePlayerPositions(snapshot.val());
-      //   });
-      // })
 
       .then(() => {
         console.log('Done loading');
@@ -123,6 +116,7 @@ export default class Game extends Phaser.Scene {
         }
       });
     } else {
+      database.ref(`games/${this.gameId}/users`).off('value', this.listener);
       this.scene.start('GameOver', { gameId: this.gameId });
     }
   }
