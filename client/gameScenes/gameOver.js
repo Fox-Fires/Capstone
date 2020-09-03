@@ -9,7 +9,7 @@ export default class GameOver extends Phaser.Scene {
     this.gameId = null;
     this.nWinners = 5;
     this.winners = [];
-
+    this.listener = null;
     this.parseWinners = this.parseWinners.bind(this);
   }
 
@@ -25,11 +25,12 @@ export default class GameOver extends Phaser.Scene {
           .text(20, 20 + i * 90, ``)
           .setFontSize(80)
           .setFontFamily('Trajan')
+          .setColor('black')
       );
     }
 
     // update leaderboard when new winner logged in DB
-    database
+    this.listener = database
       .ref(`games/${this.gameId}/winners`)
       .on('value', (snapshot) => this.parseWinners(snapshot.val()));
   }
@@ -38,15 +39,19 @@ export default class GameOver extends Phaser.Scene {
     if (data) {
       Object.values(data)
         // sort player by position
-        .sort((pos1, pos2) => pos1.place - pos2.place)
+        .sort((pos1, pos2) => pos2.place - pos1.place)
 
         // only keep top n winners
         .slice(0, this.nWinners)
 
         // put them on the leaderboard
         .forEach((winner, idx) => {
+          const name = winner.username.slice(0, 4);
+          const padding = Array(8 - name.length)
+            .fill(' ')
+            .join('');
           this.winners[idx].setText(
-            `${idx}    ${winner.username}    ${winner.place}`
+            `${idx + 1}    ${name}${padding}${winner.time * 10 ** -3}`
           );
         });
     } else {

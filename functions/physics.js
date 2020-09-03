@@ -1,4 +1,4 @@
-const planck = require("planck-js");
+const planck = require('planck-js');
 const {
   bHoleDef,
   bHoleMassData,
@@ -10,8 +10,8 @@ const {
   userRadius,
   worldScale,
   dt,
-} = require("./constants");
-const { db } = require("./admin");
+} = require('./constants');
+const { db } = require('./admin');
 
 // convenient lil func
 const round = (dec) => {
@@ -27,7 +27,7 @@ class Physics extends planck.World {
     this.barriers = [];
     this.hole = null;
     this.timer = null;
-    this.gameId = db.ref("games").push().key;
+    this.gameId = db.ref('games').push().key;
     this.update = this.update.bind(this);
     this.removeUser = this.removeUser.bind(this);
     this.winnerPlace = 1;
@@ -40,7 +40,7 @@ class Physics extends planck.World {
   startGame() {
     // update physics engine 60 time per second
     this.timer = setInterval(this.update, dt);
-    this.on("begin-contact", this.landInHole);
+    this.on('begin-contact', this.landInHole);
   }
 
   //Land in hole call back for collision
@@ -63,6 +63,7 @@ class Physics extends planck.World {
       db.ref(`games/${this.gameId}/winners/${ball.getUserData().id}`).set({
         place: place,
         username: ball.getUserData().userName,
+        time: Date.now() - ball.getUserData().startTime,
       });
       this.winnerPlace++;
     }
@@ -105,12 +106,13 @@ class Physics extends planck.World {
 
     // set user data for updating logic
     user.setUserData({
-      type: "user",
+      type: 'user',
       userName,
       id,
       prevX: x,
       prevY: y,
       prevAng: 0,
+      startTime: Date.now(),
     });
 
     // add user to object for quick access
@@ -162,7 +164,7 @@ class Physics extends planck.World {
 
     // set user data
     barrier.setUserData({
-      type: "barrier",
+      type: 'barrier',
     });
 
     // add barrier to collection
@@ -185,7 +187,7 @@ class Physics extends planck.World {
 
     //set user data
     hole.setUserData({
-      type: "hole",
+      type: 'hole',
     });
 
     this.hole = hole;
@@ -196,7 +198,7 @@ class Physics extends planck.World {
     // const data = {};
     // write only users to db
     for (let b = this.getBodyList(); b; b = b.getNext()) {
-      if (b.getUserData().type === "user") {
+      if (b.getUserData().type === 'user') {
         this.writeUser(b);
       }
     }
