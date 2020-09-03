@@ -1,7 +1,8 @@
 import React from 'react';
 import Phaser from 'phaser';
 import Game from '../gameScenes/game';
-import {Link} from 'react-router-dom'
+import GameOver from '../gameScenes/gameOver';
+import { Link } from 'react-router-dom';
 
 export default class PlayGame extends React.Component {
   componentDidMount() {
@@ -13,7 +14,7 @@ export default class PlayGame extends React.Component {
       parent: 'game-view',
       'dom.createContainer': true,
       backgroundColor: '#cccccc',
-      scene: [Game],
+      scene: [Game, GameOver],
     };
     const game = new Phaser.Game(config);
   }
@@ -26,7 +27,7 @@ export default class PlayGame extends React.Component {
     return (
       <div>
         <h1>Tentative Golf Title</h1>
-        <Link to='/'>
+        <Link to="/">
           <button onClick={handleQuit}>Leave Game</button>
         </Link>
       </div>

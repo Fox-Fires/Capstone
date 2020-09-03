@@ -1,5 +1,5 @@
-import { database } from "../../Firebase/main";
-import axios from "axios";
+import { database } from '../../Firebase/main';
+import axios from 'axios';
 
 import {
   createBall,
@@ -8,14 +8,14 @@ import {
   createTextButt,
   toggleMenu,
   createBoxes,
-} from "./helpers";
+} from './helpers';
 
 const userRadius = 15;
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: "Game",
+      key: 'Game',
     });
     this.me = null;
     this.clicked = false;
@@ -23,10 +23,6 @@ export default class Game extends Phaser.Scene {
     this.graphics;
     this.pointer;
     this.menu = false;
-    // this.graphics = this.add.graphics({
-    //   fillStyle: { color: 0xff0000 },
-    // });
-    // firebase.initializeApp(firebaseConfig);
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
@@ -34,26 +30,30 @@ export default class Game extends Phaser.Scene {
     this.allPlayers = {};
     this.updatePlayerPositions = this.updatePlayerPositions.bind(this);
     this.others = {};
+    this.listener = null;
+
+    this.apiRoute =
+      location.hostname === 'localhost'
+        ? 'http://localhost:5001/capstonegolf-67769/us-central1/api'
+        : 'https://us-central1-capstonegolf-67769.cloudfunctions.net/api';
   }
 
   preload() {
     // try {
     // Load Ball Sprites
-    this.load.image("Gerg", "./assets/Gerg.png");
-    this.load.image("golf", "./assets/golf_balls.png");
-    this.load.image("Water", "./assets/Water Tribe.png");
-    this.load.image("Earth", "./assets/Earth Kingdom.png");
-    this.load.image("Fire", "./assets/Fire Nation.png");
-    this.load.image("Air", "./assets/Air Nomads.png");
+    this.load.image('Gerg', './assets/Gerg.png');
+    this.load.image('golf', './assets/golf_balls.png');
+    this.load.image('Water', './assets/Water Tribe.png');
+    this.load.image('Earth', './assets/Earth Kingdom.png');
+    this.load.image('Fire', './assets/Fire Nation.png');
+    this.load.image('Air', './assets/Air Nomads.png');
     // Load grass background
-    this.load.image("Grass5", "./assets/grassets/grass05.png");
+    this.load.image('Grass5', './assets/grassets/grass05.png');
 
-    const loadedData = JSON.parse(localStorage.getItem("User-form"));
-    const apiRoute =
-      "http://localhost:5001/capstonegolf-67769/us-central1/api/game";
+    const loadedData = JSON.parse(localStorage.getItem('User-form'));
 
     const { data } = axios
-      .post(apiRoute, {
+      .post(`${this.apiRoute}/game`, {
         userName: loadedData.name,
       })
       .then(({ data }) => {
@@ -70,84 +70,73 @@ export default class Game extends Phaser.Scene {
         return database
 
           .ref(`games/${this.gameId}/users`)
-          .on("value", (snapshot) => {
+          .on('value', (snapshot) => {
             this.updatePlayerPositions(snapshot.val());
-            // =======
-            //           .ref(`games/${this.gameId}/users/${this.userId}`)
-            //           .once('value', (snapshot) => {
-            //             const myData = snapshot.val();
-            //             console.log('What is my data?', myData);
-            //             this.me.x = myData.x;
-            //             this.me.y = myData.y;
-            // >>>>>>> master
           });
       })
-      .then(() => {
+      .then((listener) => {
+        this.listener = listener;
+
         return database
           .ref(`games/${this.gameId}/users/${this.userId}`)
           .onDisconnect()
           .set({});
       })
 
-      // .then(() => {
-      //   console.log(`getting ready to bind to game ${this.gameId}`);
-      // const f = updatePlayerPositions.bind(this);
-      // return database
-      //   .ref(`games/${this.gameId}/users`)
-      //   .on("value", (snapshot) => {
-      //     this.updatePlayerPositions(snapshot.val());
-      //   });
-      // })
-
       .then(() => {
-        console.log("Done loading");
+        console.log('Done loading');
       })
       .catch(console.error);
   }
 
   updatePlayerPositions(data) {
-    // remove players no longer in the game
-    Object.keys(this.others).forEach((userId) => {
-      if (!data[userId]) {
-        this.others[userId].destroy();
-        delete this.others[userId];
+    if (data) {
+      // remove players no longer in the game
+      Object.keys(this.others).forEach((userId) => {
+        if (!data[userId]) {
+          this.others[userId].destroy();
+          delete this.others[userId];
+        }
+      });
+      //Delete 'me' if no longer in database
+      if (this.userId && data && !data[this.userId]) {
+        this.me.destroy();
       }
-    });
-    //Delete 'me' if no longer in database
-    if (this.userId && data && !data[this.userId]) {
-      this.me.destroy();
+
+      // update other players
+      Object.keys(data).forEach((userId) => {
+        // update existin player's position
+        if (this.others[userId] && userId !== this.userId) {
+          const incomingData = data[userId];
+          const player = this.others[userId];
+          player.x = incomingData.x;
+          player.y = incomingData.y;
+          player.rotation = incomingData.bodyAngle;
+
+          // add new players
+        } else if (!this.others[userId] && userId !== this.userId) {
+          const newPlayerData = data[userId];
+          console.log('new player data', newPlayerData);
+          const newPlayer = createBall(
+            this,
+            newPlayerData.x,
+            newPlayerData.y,
+            userRadius
+          );
+          this.others[userId] = newPlayer;
+
+          // update my position
+        } else if (userId === this.userId) {
+          const myData = data[userId];
+          this.me.x = myData.x;
+          this.me.y = myData.y;
+          this.me.rotation = myData.bodyAngle;
+        }
+      });
+    } else {
+      database.ref(`games/${this.gameId}/users`).off('value', this.listener);
+      this.scene.start('GameOver', { gameId: this.gameId });
     }
-
-    // update other players
-    Object.keys(data).forEach((userId) => {
-      // update existin player's position
-      if (this.others[userId] && userId !== this.userId) {
-        const incomingData = data[userId];
-        const player = this.others[userId];
-        player.x = incomingData.x;
-        player.y = incomingData.y;
-        player.rotation = incomingData.bodyAngle;
-
-        // add new players
-      } else if (!this.others[userId] && userId !== this.userId) {
-        const newPlayerData = data[userId];
-        console.log("new player data", newPlayerData);
-        const newPlayer = createBall(
-          this,
-          newPlayerData.x,
-          newPlayerData.y,
-          userRadius
-        );
-        this.others[userId] = newPlayer;
-
-        // update my position
-      } else if (userId === this.userId) {
-        const myData = data[userId];
-        this.me.x = myData.x;
-        this.me.y = myData.y;
-        this.me.rotation = myData.bodyAngle;
-      }
-    });
   }
 
   create() {
@@ -155,7 +144,7 @@ export default class Game extends Phaser.Scene {
     let currScene = this;
 
     // Add background
-    this.add.image(512 / 2, 512 / 2, "Grass5");
+    this.add.image(512 / 2, 512 / 2, 'Grass5');
 
     // createBox(this, 400, 580, 800, 40); // top
     // createBox(this, 400, 20, 800, 40); // bottom
@@ -181,29 +170,28 @@ export default class Game extends Phaser.Scene {
     createHole(this, 300, 300, 15); //The hole
 
     // load me
-    this.me = createBallSprite(this, 0, 0, "Gerg");
+    this.me = createBallSprite(this, 0, 0, 'Gerg');
 
     // Array of Sprites
     // const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
 
     // Init Switch Balls button
-    this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
+    this.switchSprite = createTextButt(this, 20, 20, 'Switch Balls');
     // On-Click listener
-    this.switchSprite.on("pointerdown", function () {
+    this.switchSprite.on('pointerdown', function () {
       toggleMenu(currScene);
     });
-
-    // add listener for new data
 
     //Pointer graphic
     this.graphics = this.add.graphics({
       fillStyle: { color: 0xff0000 },
     });
     this.input.on(
-      "pointerdown",
+      'pointerdown',
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
+
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
           this.clicked = true;
           this.line1 = new Phaser.Geom.Line(
@@ -223,7 +211,7 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointermove",
+      'pointermove',
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
@@ -232,15 +220,15 @@ export default class Game extends Phaser.Scene {
       this
     );
     this.input.on(
-      "pointerup",
+      'pointerup',
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
         if (this.clicked) {
-          axios.put(
-            `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
-            { x: difx / 2, y: dify / 2 }
-          );
+          axios.put(`${this.apiRoute}/${this.userId}`, {
+            x: difx / 2,
+            y: dify / 2,
+          });
         }
         this.clicked = false;
       },
@@ -248,9 +236,8 @@ export default class Game extends Phaser.Scene {
     );
 
     // camera
-    // breaking over here
     this.cameras.main.startFollow(this.me);
-    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
+    this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
@@ -266,16 +253,6 @@ export default class Game extends Phaser.Scene {
   }
 
   update() {
-    // this.switchSprite.x = 20 - (-199.9 - this.cameras.main.worldView.x);
-    // this.switchSprite.y = 20 - (-99.9 - this.cameras.main.worldView.y);
-    // this.switchSprite.setPosition(
-    //   this.cameras.main.worldView.x + 20,
-    //   this.cameras.main.worldView.y + 20
-    // );
-
-    // this.switchSprite.setPosition(this.me.x - 400 * 0.9, this.me.y - 300 * 0.9);
-    // this.switchSprite.setFontSize(20 / this.cameras.main.zoom);
-
     //Graphics for dotted line indicator
     this.graphics.clear();
     if (this.clicked) {
