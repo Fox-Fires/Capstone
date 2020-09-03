@@ -1,9 +1,7 @@
+import { database } from '../../Firebase/main';
+import axios from 'axios';
 
-import { database } from "../../Firebase/main";
-import axios from "axios";
-
-import { createBall, createBox, createHole } from "./helpers";
-
+import { createBall, createBox, createHole } from './helpers';
 
 const userRadius = 15;
 
@@ -29,10 +27,11 @@ export default class Game extends Phaser.Scene {
   preload() {
     this.load.image('Gerg', './assets/Gerg.png');
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
-    const apiRoute =
-      location.hostname === 'localhost'
-        ? 'http://localhost:5001/capstonegolf-67769/us-central1/api'
-        : 'https://us-central1-capstonegolf-67769.cloudfunctions.net/api';
+    // const apiRoute =
+    //   location.hostname === 'localhost'
+    //     ? 'http://localhost:5001/capstonegolf-67769/us-central1/api'
+    //     : 'https://us-central1-capstonegolf-67769.cloudfunctions.net/api';
+    const apiRoute = 'http://localhost:5001/capstonegolf-67769/us-central1/api';
 
     const { data } = axios
       .post(`${apiRoute}/game`, {
@@ -52,7 +51,7 @@ export default class Game extends Phaser.Scene {
         return database
 
           .ref(`games/${this.gameId}/users`)
-          .on("value", (snapshot) => {
+          .on('value', (snapshot) => {
             this.updatePlayerPositions(snapshot.val());
           });
       })
@@ -92,11 +91,6 @@ export default class Game extends Phaser.Scene {
       if (this.userId && data && !data[this.userId]) {
         this.me.destroy();
       }
-    });
-    //Delete 'me' if no longer in database
-    if (this.userId && data && !data[this.userId]) {
-      this.me.destroy();
-    }
 
       // update other players
       Object.keys(data).forEach((userId) => {
@@ -187,10 +181,7 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
         if (this.clicked) {
-          axios.put(
-            `${apiRoute}/${this.userId}`,
-            { x: difx / 2, y: dify / 2 }
-          );
+          axios.put(`${apiRoute}/${this.userId}`, { x: difx / 2, y: dify / 2 });
         }
         this.clicked = false;
       },
