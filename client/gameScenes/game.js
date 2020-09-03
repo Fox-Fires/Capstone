@@ -8,6 +8,7 @@ import {
   createBallSprite,
   createTextButt,
   toggleMenu,
+  createBoxes,
 } from "./helpers";
 
 const userRadius = 15;
@@ -157,11 +158,25 @@ export default class Game extends Phaser.Scene {
     // Add background
     this.add.image(512 / 2, 512 / 2, "Grass5");
 
-    // Add visuals for barriers
-    createBox(this, 0, 0, 800, 40); // top
-    createBox(this, 0, 560, 800, 40); // bottom
-    createBox(this, 0, 0, 40, 600); // left
-    createBox(this, 760, 0, 40, 600); // right
+    // createBox(this, 400, 580, 800, 40); // top
+    // createBox(this, 400, 20, 800, 40); // bottom
+    // createBox(this, 20, 300, 40, 600); // left
+    // createBox(this, 780, 300, 40, 600); // right
+
+    // Coordinates for planck barriers
+    const test = [
+      { x: 400, y: 580, w: 800, h: 40 }, // Bottom
+      { x: 400, y: 20, w: 800, h: 40 }, // Top
+      { x: 20, y: 300, w: 40, h: 600 }, // Left
+      { x: 780, y: 300, w: 40, h: 600 }, // Right
+    ];
+    const level1 = [
+      { x: 400, y: 580, w: 800, h: 40 }, // bottom
+      { x: 20, y: 0, w: 40, h: 1200 }, // left
+      { x: 780, y: 0, w: 40, h: 1200 }, // right
+    ];
+    // Adds visuals for planck barriers
+    createBoxes(this, level1);
 
     // Add hole visual
     createHole(this, 300, 300, 15); //The hole

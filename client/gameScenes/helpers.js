@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { barriers } from "../../functions/constants";
 const userRadius = 15; // pixels
 
 export const makePlayers = (scene, data) => {
@@ -130,9 +131,18 @@ export const createBox = (scene, x, y, w, h) => {
 
   const box = scene.add.graphics();
   box.fillStyle(color.color, 1);
-  box.fillRect(x, y, w, h);
+  box.fillRect(-w / 2, -h / 2, w, h);
+
+  box.x = x;
+  box.y = y;
 
   return box;
+};
+
+export const createBoxes = (scene, barriers) => {
+  barriers.forEach(({ x, y, w, h }) => {
+    createBox(scene, x, y, w, h);
+  });
 };
 
 export const updatePlayerPositions = (data) => {
