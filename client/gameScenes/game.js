@@ -4,6 +4,7 @@ import axios from "axios";
 import {
   createBall,
   createBox,
+  createHole,
   createBallSprite,
   createTextButt,
   createMenu,
@@ -38,12 +39,14 @@ export default class Game extends Phaser.Scene {
 
   preload() {
     // try {
+    // Load Ball Sprites
     this.load.image("Gerg", "./assets/Gerg.png");
     this.load.image("golf", "./assets/golf_balls.png");
     this.load.image("Water", "./assets/Water Tribe.png");
     this.load.image("Earth", "./assets/Earth Kingdom.png");
     this.load.image("Fire", "./assets/Fire Nation.png");
     this.load.image("Air", "./assets/Air Nomads.png");
+    // Load grass background
     this.load.image("Grass5", "./assets/grassets/grass05.png");
 
     const loadedData = JSON.parse(localStorage.getItem("User-form"));
@@ -55,17 +58,15 @@ export default class Game extends Phaser.Scene {
         userName: loadedData.name,
       })
       .then(({ data }) => {
-        console.log("game data", data);
         this.userId = data.userId;
         this.gameId = data.gameId;
         return database
           .ref(`games/${this.gameId}/users/${this.userId}`)
           .once("value", (snapshot) => {
             const myData = snapshot.val();
-            // this.me = createBall(this, myData.x, myData.y, 15);
+            console.log("What is my data?", myData);
             this.me.x = myData.x;
             this.me.y = myData.y;
-            console.log("my data", { x: this.me.x, y: this.me.y });
           });
       })
       .then(() => {
@@ -97,6 +98,10 @@ export default class Game extends Phaser.Scene {
         delete this.others[userId];
       }
     });
+    //Delete 'me' if no longer in database
+    if (this.userId && data && !data[this.userId]) {
+      this.me.destroy();
+    }
 
     // update other players
     Object.keys(data).forEach((userId) => {
@@ -131,22 +136,31 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    // Current scene variable
     let currScene = this;
-    this.worldScale = 30;
-    // add background
+
+    // Add background
     this.add.image(512 / 2, 512 / 2, "Grass5");
+
+    // Add visuals for barriers
     createBox(this, 0, 0, 800, 40); // top
     createBox(this, 0, 560, 800, 40); // bottom
     createBox(this, 0, 0, 40, 600); // left
     createBox(this, 760, 0, 40, 600); // right
+    createHole(this, 300, 300, 15); //The hole
 
     // load me
     this.me = createBallSprite(this, 0, 0, "Gerg");
 
-    const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
+    // Array of Sprites
+    // const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
+
+    // Init Switch Balls button
     this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
+    // On-Click listener
     this.switchSprite.on("pointerdown", function () {
       if (currScene.menu === false) {
+        // Create the sprite menu
         currScene.spriteMenu = createMenu(currScene, 20, 45, 100, 255);
         currScene.spriteWater = ballSpritePicker(currScene, 70, 70, "Water");
         currScene.spriteEarth = ballSpritePicker(currScene, 70, 110, "Earth");
@@ -156,6 +170,7 @@ export default class Game extends Phaser.Scene {
         currScene.spriteGolf = ballSpritePicker(currScene, 70, 270, "golf");
         currScene.menu = true;
       } else {
+        // Remove the sprite menu
         currScene.spriteMenu.destroy();
         currScene.spriteWater.destroy();
         currScene.spriteEarth.destroy();
@@ -269,6 +284,7 @@ export default class Game extends Phaser.Scene {
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
     }
+    // Set previous coordinates
     if (
       Math.round(this.me.x) != this.previousX ||
       Math.round(this.me.y) != this.previousY

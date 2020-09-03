@@ -23,6 +23,7 @@ export const createBall = (scene, x, y, r) => {
   return ball;
 };
 
+// init a ball with sprite
 export const createBallSprite = (scene, x, y, sprite) => {
   const ball = scene.add.image(0, 0, sprite);
 
@@ -32,6 +33,7 @@ export const createBallSprite = (scene, x, y, sprite) => {
   return ball;
 };
 
+// Creates a text button
 export const createTextButt = (scene, x, y, text) => {
   const button = scene.add
     .text(0, 0, text)
@@ -53,6 +55,7 @@ export const createTextButt = (scene, x, y, text) => {
   return button;
 };
 
+// Creates the white menu background
 export const createMenu = (scene, x, y, w, h) => {
   const color = new Phaser.Display.Color.ValueToColor("#FFFFFF");
 
@@ -64,6 +67,7 @@ export const createMenu = (scene, x, y, w, h) => {
   return box;
 };
 
+// Creates the ball picker button
 export const ballSpritePicker = (scene, x, y, sprite) => {
   const ball = scene.add.image(0, 0, sprite);
   ball.setInteractive();
@@ -75,6 +79,16 @@ export const ballSpritePicker = (scene, x, y, sprite) => {
   ball.y = y;
 
   return ball;
+};
+export const createHole = (scene, x, y, r) => {
+  const color = new Phaser.Display.Color();
+  const hole = scene.add.graphics();
+  hole.fillStyle(color.color, 1);
+  hole.fillCircle(0, 0, r);
+  hole.x = x;
+  hole.y = y;
+
+  return hole;
 };
 
 export const createBox = (scene, x, y, w, h) => {
