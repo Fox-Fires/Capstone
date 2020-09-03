@@ -3,7 +3,6 @@ import axios from "axios";
 
 import {
   createBall,
-  createBox,
   createHole,
   createBallSprite,
   createTextButt,
