@@ -22,7 +22,7 @@ export default class GameOver extends Phaser.Scene {
     for (let i = 0; i < this.nWinners; i++) {
       this.winners.push(
         this.add
-          .text(20, 20 + i * 10, ``)
+          .text(20, 20 + i * 90, ``)
           .setFontSize(80)
           .setFontFamily('Trajan')
       );
@@ -31,7 +31,7 @@ export default class GameOver extends Phaser.Scene {
     // update leaderboard when new winner logged in DB
     database
       .ref(`games/${this.gameId}/winners`)
-      .once('value', (snapshot) => this.parseWinners(snapshot.val()));
+      .on('value', (snapshot) => this.parseWinners(snapshot.val()));
   }
 
   parseWinners(data) {
@@ -45,13 +45,13 @@ export default class GameOver extends Phaser.Scene {
 
         // put them on the leaderboard
         .forEach((winner, idx) => {
-          this.winners[idx].setText(`${winner.username}    ${winner.place}`);
+          this.winners[idx].setText(
+            `${idx}    ${winner.username}    ${winner.place}`
+          );
         });
     } else {
       // clear leaderboard if db is cleared
       this.winners.forEach((winner) => winner.setText(''));
     }
   }
-
-  update() {}
 }
