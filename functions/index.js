@@ -17,7 +17,7 @@ app.use(cors({ origin: true }));
 app.post('/game', async (req, res) => {
   if (!game) {
     game = new Physics();
-    game.loadLevel(barriers.test);
+    game.loadLevel(barriers.level1);
     game.addHole(holeCoordinate);
     game.startGame();
   }
@@ -38,9 +38,5 @@ app.put('/:userId', (req, res) => {
     res.sendStatus(400);
   }
 });
-
-app.delete;
-
-// called when all users have completed game
 
 exports.api = functions.https.onRequest(app);

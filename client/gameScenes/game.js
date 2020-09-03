@@ -1,7 +1,14 @@
 import { database } from '../../Firebase/main';
 import axios from 'axios';
 
-import { createBall, createBox, createHole } from './helpers';
+import {
+  createBall,
+  createHole,
+  createBallSprite,
+  createTextButt,
+  toggleMenu,
+  createBoxes,
+} from './helpers';
 
 const userRadius = 15;
 
@@ -15,6 +22,7 @@ export default class Game extends Phaser.Scene {
     this.line1;
     this.graphics;
     this.pointer;
+    this.menu = false;
     this.previousX = 0;
     this.previousY = 0;
     this.userId = null;
@@ -31,7 +39,17 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
+    // try {
+    // Load Ball Sprites
     this.load.image('Gerg', './assets/Gerg.png');
+    this.load.image('golf', './assets/golf_balls.png');
+    this.load.image('Water', './assets/Water Tribe.png');
+    this.load.image('Earth', './assets/Earth Kingdom.png');
+    this.load.image('Fire', './assets/Fire Nation.png');
+    this.load.image('Air', './assets/Air Nomads.png');
+    // Load grass background
+    this.load.image('Grass5', './assets/grassets/grass05.png');
+
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
 
     const { data } = axios
@@ -122,15 +140,47 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    this.worldScale = 30;
-    createBox(this, 0, 0, 800, 40); // top
-    createBox(this, 0, 560, 800, 40); // bottom
-    createBox(this, 0, 0, 40, 600); // left
-    createBox(this, 760, 0, 40, 600); // right
+    // Current scene variable
+    let currScene = this;
+
+    // Add background
+    this.add.image(512 / 2, 512 / 2, 'Grass5');
+
+    // createBox(this, 400, 580, 800, 40); // top
+    // createBox(this, 400, 20, 800, 40); // bottom
+    // createBox(this, 20, 300, 40, 600); // left
+    // createBox(this, 780, 300, 40, 600); // right
+
+    // Coordinates for planck barriers
+    const test = [
+      { x: 400, y: 580, w: 800, h: 40 }, // Bottom
+      { x: 400, y: 20, w: 800, h: 40 }, // Top
+      { x: 20, y: 300, w: 40, h: 600 }, // Left
+      { x: 780, y: 300, w: 40, h: 600 }, // Right
+    ];
+    const level1 = [
+      { x: 400, y: 580, w: 800, h: 40 }, // bottom
+      { x: 20, y: 0, w: 40, h: 1200 }, // left
+      { x: 780, y: 0, w: 40, h: 1200 }, // right
+    ];
+    // Adds visuals for planck barriers
+    createBoxes(this, level1);
+
+    // Add hole visual
     createHole(this, 300, 300, 15); //The hole
 
     // load me
-    this.me = createBall(this, 0, 0, userRadius);
+    this.me = createBallSprite(this, 0, 0, 'Gerg');
+
+    // Array of Sprites
+    // const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
+
+    // Init Switch Balls button
+    this.switchSprite = createTextButt(this, 20, 20, 'Switch Balls');
+    // On-Click listener
+    this.switchSprite.on('pointerdown', function () {
+      toggleMenu(currScene);
+    });
 
     //Pointer graphic
     this.graphics = this.add.graphics({
@@ -223,6 +273,7 @@ export default class Game extends Phaser.Scene {
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
     }
+    // Set previous coordinates
     if (
       Math.round(this.me.x) != this.previousX ||
       Math.round(this.me.y) != this.previousY

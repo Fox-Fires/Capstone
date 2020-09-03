@@ -2,6 +2,7 @@ import React from 'react';
 import Phaser from 'phaser';
 import Game from '../gameScenes/game';
 import GameOver from '../gameScenes/gameOver';
+import { Link } from 'react-router-dom';
 
 export default class PlayGame extends React.Component {
   componentDidMount() {
@@ -25,7 +26,10 @@ export default class PlayGame extends React.Component {
     const { handleQuit } = this.props;
     return (
       <div>
-        <button onClick={handleQuit}>Leave Game</button>
+        <h1>Tentative Golf Title</h1>
+        <Link to="/">
+          <button onClick={handleQuit}>Leave Game</button>
+        </Link>
       </div>
     );
   }
