@@ -1,4 +1,4 @@
-const Vec2 = require('planck-js').Vec2;
+const Vec2 = require("planck-js").Vec2;
 
 exports.worldScale = 30; // pixels/meter
 
@@ -12,7 +12,7 @@ exports.ballFixtureDef = {
   friction: 0.1,
   restitution: 0.9,
   density: 1,
-  userData: 'ball',
+  userData: "ball",
 };
 
 exports.ballMassData = {
@@ -26,13 +26,13 @@ exports.userRadius = 15;
 exports.railFixtureDef = {
   friction: 0.1,
   restitution: 0.09,
-  userData: 'rail',
+  userData: "rail",
 };
 
 exports.bHoleDef = {
   isSensor: true,
-  userData: "hole"
-}
+  userData: "hole",
+};
 
 exports.bHoleMassData = {
   mass: 1,
@@ -59,10 +59,16 @@ const test = [
   { x: 780, y: 300, w: 40, h: 600 }, // 800 - 20, 600 / 2, 40, 600
 ];
 
+const level1 = [
+  { x: 400, y: 580, w: 800, h: 40 }, // bottom
+  { x: 20, y: 0, w: 40, h: 1200 }, // left
+  { x: 780, y: 0, w: 40, h: 1200 }, // right
+];
+
 exports.barriers = {
   test,
+  level1,
 };
 
 // in the form of [x,y]
-exports.holeCoordinate = [300,300]
-
+exports.holeCoordinate = [300, 300];

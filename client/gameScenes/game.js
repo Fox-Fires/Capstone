@@ -1,23 +1,28 @@
-
-import planck from "planck-js";
 import { database } from "../../Firebase/main";
 import axios from "axios";
 
-import { createBall, createBox, createHole } from "./helpers";
-
+import {
+  createBall,
+  createHole,
+  createBallSprite,
+  createTextButt,
+  toggleMenu,
+  createBoxes,
+} from "./helpers";
 
 const userRadius = 15;
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super({
-      key: 'Game',
+      key: "Game",
     });
     this.me = null;
     this.clicked = false;
     this.line1;
     this.graphics;
     this.pointer;
+    this.menu = false;
     // this.graphics = this.add.graphics({
     //   fillStyle: { color: 0xff0000 },
     // });
@@ -33,10 +38,19 @@ export default class Game extends Phaser.Scene {
 
   preload() {
     // try {
-    this.load.image('Gerg', './assets/Gerg.png');
-    const loadedData = JSON.parse(localStorage.getItem('User-form'));
+    // Load Ball Sprites
+    this.load.image("Gerg", "./assets/Gerg.png");
+    this.load.image("golf", "./assets/golf_balls.png");
+    this.load.image("Water", "./assets/Water Tribe.png");
+    this.load.image("Earth", "./assets/Earth Kingdom.png");
+    this.load.image("Fire", "./assets/Fire Nation.png");
+    this.load.image("Air", "./assets/Air Nomads.png");
+    // Load grass background
+    this.load.image("Grass5", "./assets/grassets/grass05.png");
+
+    const loadedData = JSON.parse(localStorage.getItem("User-form"));
     const apiRoute =
-      'http://localhost:5001/capstonegolf-67769/us-central1/api/game';
+      "http://localhost:5001/capstonegolf-67769/us-central1/api/game";
 
     const { data } = axios
       .post(apiRoute, {
@@ -58,14 +72,14 @@ export default class Game extends Phaser.Scene {
           .ref(`games/${this.gameId}/users`)
           .on("value", (snapshot) => {
             this.updatePlayerPositions(snapshot.val());
-// =======
-//           .ref(`games/${this.gameId}/users/${this.userId}`)
-//           .once('value', (snapshot) => {
-//             const myData = snapshot.val();
-//             console.log('What is my data?', myData);
-//             this.me.x = myData.x;
-//             this.me.y = myData.y;
-// >>>>>>> master
+            // =======
+            //           .ref(`games/${this.gameId}/users/${this.userId}`)
+            //           .once('value', (snapshot) => {
+            //             const myData = snapshot.val();
+            //             console.log('What is my data?', myData);
+            //             this.me.x = myData.x;
+            //             this.me.y = myData.y;
+            // >>>>>>> master
           });
       })
       .then(() => {
@@ -86,7 +100,7 @@ export default class Game extends Phaser.Scene {
       // })
 
       .then(() => {
-        console.log('Done loading');
+        console.log("Done loading");
       })
       .catch(console.error);
   }
@@ -117,7 +131,7 @@ export default class Game extends Phaser.Scene {
         // add new players
       } else if (!this.others[userId] && userId !== this.userId) {
         const newPlayerData = data[userId];
-        console.log('new player data', newPlayerData);
+        console.log("new player data", newPlayerData);
         const newPlayer = createBall(
           this,
           newPlayerData.x,
@@ -137,15 +151,47 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    this.worldScale = 30;
-    createBox(this, 0, 0, 800, 40); // top
-    createBox(this, 0, 560, 800, 40); // bottom
-    createBox(this, 0, 0, 40, 600); // left
-    createBox(this, 760, 0, 40, 600); // right
+    // Current scene variable
+    let currScene = this;
+
+    // Add background
+    this.add.image(512 / 2, 512 / 2, "Grass5");
+
+    // createBox(this, 400, 580, 800, 40); // top
+    // createBox(this, 400, 20, 800, 40); // bottom
+    // createBox(this, 20, 300, 40, 600); // left
+    // createBox(this, 780, 300, 40, 600); // right
+
+    // Coordinates for planck barriers
+    const test = [
+      { x: 400, y: 580, w: 800, h: 40 }, // Bottom
+      { x: 400, y: 20, w: 800, h: 40 }, // Top
+      { x: 20, y: 300, w: 40, h: 600 }, // Left
+      { x: 780, y: 300, w: 40, h: 600 }, // Right
+    ];
+    const level1 = [
+      { x: 400, y: 580, w: 800, h: 40 }, // bottom
+      { x: 20, y: 0, w: 40, h: 1200 }, // left
+      { x: 780, y: 0, w: 40, h: 1200 }, // right
+    ];
+    // Adds visuals for planck barriers
+    createBoxes(this, level1);
+
+    // Add hole visual
     createHole(this, 300, 300, 15); //The hole
 
     // load me
-    this.me = createBall(this, 0, 0, userRadius);
+    this.me = createBallSprite(this, 0, 0, "Gerg");
+
+    // Array of Sprites
+    // const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
+
+    // Init Switch Balls button
+    this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
+    // On-Click listener
+    this.switchSprite.on("pointerdown", function () {
+      toggleMenu(currScene);
+    });
 
     // add listener for new data
 
@@ -154,16 +200,12 @@ export default class Game extends Phaser.Scene {
       fillStyle: { color: 0xff0000 },
     });
     this.input.on(
-      'pointerdown',
+      "pointerdown",
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
-
-        // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
           this.clicked = true;
-          // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
-          // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
             this.me.x,
             this.me.y,
@@ -177,31 +219,24 @@ export default class Game extends Phaser.Scene {
             this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
           }
         }
-        // console.log(this.clicked);
       },
       this
     );
     this.input.on(
-      'pointermove',
+      "pointermove",
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
-          // console.log(" while clicked pointer", this.pointer);
         }
       },
       this
     );
     this.input.on(
-      'pointerup',
+      "pointerup",
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
         if (this.clicked) {
-          // this.me.applyLinearImpulse(
-          //   planck.Vec2(difx / 2, dify / 2),
-          //   planck.Vec2(this.me.x, this.me.y),
-          //   true
-          // );
           axios.put(
             `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
             { x: difx / 2, y: dify / 2 }
@@ -215,7 +250,7 @@ export default class Game extends Phaser.Scene {
     // camera
     // breaking over here
     this.cameras.main.startFollow(this.me);
-    this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY) {
+    this.input.on("wheel", function (pointer, gameObjects, deltaX, deltaY) {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
@@ -231,28 +266,15 @@ export default class Game extends Phaser.Scene {
   }
 
   update() {
-    // advance the simulation by 1/60 seconds
-    // this.world.step(1 / 60);
+    // this.switchSprite.x = 20 - (-199.9 - this.cameras.main.worldView.x);
+    // this.switchSprite.y = 20 - (-99.9 - this.cameras.main.worldView.y);
+    // this.switchSprite.setPosition(
+    //   this.cameras.main.worldView.x + 20,
+    //   this.cameras.main.worldView.y + 20
+    // );
 
-    // crearForces  method should be added at the end on each step
-    // this.world.clearForces();
-
-    // iterate through all bodies
-    // for (let b = this.world.getBodyList(); b; b = b.getNext()) {
-    //   // get body position
-    //   let bodyPosition = b.getPosition();
-
-    //   // get body angle, in radians
-    //   let bodyAngle = b.getAngle();
-
-    //   // get body user data, the graphics object
-    //   let userData = b.getUserData();
-
-    //   // adjust graphic object position and rotation
-    //   userData.x = bodyPosition.x * this.worldScale;
-    //   userData.y = bodyPosition.y * this.worldScale;
-    //   userData.rotation = bodyAngle;
-    // }
+    // this.switchSprite.setPosition(this.me.x - 400 * 0.9, this.me.y - 300 * 0.9);
+    // this.switchSprite.setFontSize(20 / this.cameras.main.zoom);
 
     //Graphics for dotted line indicator
     this.graphics.clear();
@@ -274,6 +296,7 @@ export default class Game extends Phaser.Scene {
         this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
       }
     }
+    // Set previous coordinates
     if (
       Math.round(this.me.x) != this.previousX ||
       Math.round(this.me.y) != this.previousY
