@@ -60,14 +60,6 @@ export default class Game extends Phaser.Scene {
           .ref(`games/${this.gameId}/users`)
           .on("value", (snapshot) => {
             this.updatePlayerPositions(snapshot.val());
-// =======
-//           .ref(`games/${this.gameId}/users/${this.userId}`)
-//           .once('value', (snapshot) => {
-//             const myData = snapshot.val();
-//             console.log('What is my data?', myData);
-//             this.me.x = myData.x;
-//             this.me.y = myData.y;
-// >>>>>>> master
           });
       })
       .then(() => {
@@ -202,7 +194,7 @@ export default class Game extends Phaser.Scene {
         let dify = 300 - pointer.y;
         if (this.clicked) {
           axios.put(
-            `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
+            `${apiRoute}/${this.userId}`,
             { x: difx / 2, y: dify / 2 }
           );
         }
