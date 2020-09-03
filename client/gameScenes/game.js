@@ -41,6 +41,7 @@ export default class Game extends Phaser.Scene {
   preload() {
     // try {
     // Load Ball Sprites
+
     this.load.image('Gerg', './assets/Gerg.png');
     this.load.image('golf', './assets/golf_balls.png');
     this.load.image('Water', './assets/Water Tribe.png');
@@ -49,6 +50,8 @@ export default class Game extends Phaser.Scene {
     this.load.image('Air', './assets/Air Nomads.png');
     // Load grass background
     this.load.image('Grass5', './assets/grassets/grass05.png');
+    // Load Audio
+    this.load.audio('audio_swing','./assets/audio/golf-swing.mp3')
 
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
 
@@ -140,6 +143,8 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    //Initialize sound
+    this.ballswing = this.sound.add("audio_swing")
     // Current scene variable
     let currScene = this;
 
@@ -230,6 +235,7 @@ export default class Game extends Phaser.Scene {
             y: dify / 2,
           });
         }
+        this.ballswing.play();
         this.clicked = false;
       },
       this
