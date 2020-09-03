@@ -60,13 +60,27 @@ export default class Game extends Phaser.Scene {
       .then(({ data }) => {
         this.userId = data.userId;
         this.gameId = data.gameId;
+        //   return database
+        //     .ref(`games/${this.gameId}/users/${this.userId}`)
+        //     .on("value", (snapshot) => {
+        //       const myData = snapshot.val();
+        //       // this.me = createBall(this, myData.x, myData.y, 15);
+        //       this.me.x = myData.x;
+        //       this.me.y = myData.y;
+        //     });
         return database
-          .ref(`games/${this.gameId}/users/${this.userId}`)
-          .once("value", (snapshot) => {
-            const myData = snapshot.val();
-            console.log("What is my data?", myData);
-            this.me.x = myData.x;
-            this.me.y = myData.y;
+
+          .ref(`games/${this.gameId}/users`)
+          .on("value", (snapshot) => {
+            this.updatePlayerPositions(snapshot.val());
+            // =======
+            //           .ref(`games/${this.gameId}/users/${this.userId}`)
+            //           .once('value', (snapshot) => {
+            //             const myData = snapshot.val();
+            //             console.log('What is my data?', myData);
+            //             this.me.x = myData.x;
+            //             this.me.y = myData.y;
+            // >>>>>>> master
           });
       })
       .then(() => {
@@ -75,15 +89,17 @@ export default class Game extends Phaser.Scene {
           .onDisconnect()
           .set({});
       })
-      .then(() => {
-        console.log(`getting ready to bind to game ${this.gameId}`);
-        // const f = updatePlayerPositions.bind(this);
-        return database
-          .ref(`games/${this.gameId}/users`)
-          .on("value", (snapshot) => {
-            this.updatePlayerPositions(snapshot.val());
-          });
-      })
+
+      // .then(() => {
+      //   console.log(`getting ready to bind to game ${this.gameId}`);
+      // const f = updatePlayerPositions.bind(this);
+      // return database
+      //   .ref(`games/${this.gameId}/users`)
+      //   .on("value", (snapshot) => {
+      //     this.updatePlayerPositions(snapshot.val());
+      //   });
+      // })
+
       .then(() => {
         console.log("Done loading");
       })

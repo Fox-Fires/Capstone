@@ -1,4 +1,4 @@
-const planck = require('planck-js');
+const planck = require("planck-js");
 const {
   bHoleDef,
   bHoleMassData,
@@ -10,8 +10,8 @@ const {
   userRadius,
   worldScale,
   dt,
-} = require('./constants');
-const { db } = require('./admin');
+} = require("./constants");
+const { db } = require("./admin");
 
 // convenient lil func
 const round = (dec) => {
@@ -27,9 +27,9 @@ class Physics extends planck.World {
     this.barriers = [];
     this.hole = null;
     this.timer = null;
-    this.gameId = db.ref('games').push().key;
+    this.gameId = db.ref("games").push().key;
     this.update = this.update.bind(this);
-    this.removeUser =this.removeUser.bind(this)
+    this.removeUser = this.removeUser.bind(this);
     this.winnerPlace = 1;
     // this.write = this.write.bind(this);
 
@@ -44,31 +44,35 @@ class Physics extends planck.World {
   }
 
   //Land in hole call back for collision
-  landInHole(contact){
+  landInHole(contact) {
     const fixtureA = contact.getFixtureA();
     const fixtureB = contact.getFixtureB();
-    const hole = (fixtureA.getUserData()===bHoleDef.userData && fixtureA.getBody())||
-      (fixtureB.getUserData()===bHoleDef.userData &&fixtureB.getBody())
-    const ball = (fixtureA.getUserData()===ballFixtureDef.userData && fixtureA.getBody()) ||
-      (fixtureB.getUserData()===ballFixtureDef.userData && fixtureB.getBody())
+    const hole =
+      (fixtureA.getUserData() === bHoleDef.userData && fixtureA.getBody()) ||
+      (fixtureB.getUserData() === bHoleDef.userData && fixtureB.getBody());
+    const ball =
+      (fixtureA.getUserData() === ballFixtureDef.userData &&
+        fixtureA.getBody()) ||
+      (fixtureB.getUserData() === ballFixtureDef.userData &&
+        fixtureB.getBody());
 
-    const removeUser = this.removeUser
-    const place = this.winnerPlace
+    const removeUser = this.removeUser;
+    const place = this.winnerPlace;
     //Send place data to game instance in database
-    if(hole && ball){
+    if (hole && ball) {
       db.ref(`games/${this.gameId}/winners/${ball.getUserData().id}`).set({
-        place:place,
-        username:ball.getUserData().userName
-      })
+        place: place,
+        username: ball.getUserData().userName,
+      });
       this.winnerPlace++;
     }
     //Need a setTimeout to prevent termination attempt of an object while 'locked' (will fail to remove ball)
-    setTimeout(function(){
-      if(hole && ball){
+    setTimeout(function () {
+      if (hole && ball) {
         //Destroy planck body and remove user data
         removeUser(ball.getUserData().id);
       }
-    },1)
+    }, 1);
   }
 
   endGame() {
@@ -101,7 +105,7 @@ class Physics extends planck.World {
 
     // set user data for updating logic
     user.setUserData({
-      type: 'user',
+      type: "user",
       userName,
       id,
       prevX: x,
@@ -158,7 +162,7 @@ class Physics extends planck.World {
 
     // set user data
     barrier.setUserData({
-      type: 'barrier',
+      type: "barrier",
     });
 
     // add barrier to collection
@@ -168,29 +172,31 @@ class Physics extends planck.World {
   }
 
   //Add hole ie: the goal   hole is in the form [x,y]
-  addHole(holeCoordinate){
-    const hole = this.createBody()
-    hole.createFixture(
-      planck.Circle(1/worldScale),
-      bHoleDef
+  addHole(holeCoordinate) {
+    const hole = this.createBody();
+    hole.createFixture(planck.Circle(1 / worldScale), bHoleDef);
+    hole.setPosition(
+      planck.Vec2(
+        holeCoordinate[0] / worldScale,
+        holeCoordinate[1] / worldScale
+      )
     );
-    hole.setPosition(planck.Vec2(holeCoordinate[0] / worldScale, holeCoordinate[1] / worldScale))
     hole.setMassData(bHoleMassData);
 
     //set user data
     hole.setUserData({
-      type: 'hole',
-    })
+      type: "hole",
+    });
 
     this.hole = hole;
-    return hole
+    return hole;
   }
 
   write() {
     // const data = {};
     // write only users to db
     for (let b = this.getBodyList(); b; b = b.getNext()) {
-      if (b.getUserData().type === 'user') {
+      if (b.getUserData().type === "user") {
         this.writeUser(b);
       }
     }
@@ -232,46 +238,46 @@ class Physics extends planck.World {
     }
   }
 
-  puttUser(userId) {
-    const user = this.users[userId];
-    const pos = user.getPosition();
+  // puttUser(userId) {
+  //   const user = this.users[userId];
+  //   const pos = user.getPosition();
 
-    // Look for move on user, and apply move
-    db.ref(`games/${this.gameId}/users/${userId}/move`).once(
-      'value',
-      (snapshot) => {
-        const userMove = snapshot.val();
+  //   // Look for move on user, and apply move
+  //   db.ref(`games/${this.gameId}/users/${userId}/move`).on(
+  //     "value",
+  //     (snapshot) => {
+  //       const userMove = snapshot.val();
 
-        // check if there's a move waiting to be applied
-        if (userMove && userMove.waiting === false) {
-          console.log(
-            'sending move:',
-            userMove.vec2x,
-            userMove.vec2y,
-            'to:',
-            pos.x * worldScale,
-            pos.y * worldScale
-          );
+  //       // check if there's a move waiting to be applied
+  //       if (userMove && userMove.waiting === false) {
+  //         console.log(
+  //           "sending move:",
+  //           userMove.vec2x,
+  //           userMove.vec2y,
+  //           "to:",
+  //           pos.x * worldScale,
+  //           pos.y * worldScale
+  //         );
 
-          // apply it
-          user.applyLinearImpulse(
-            planck.Vec2(userMove.vec2x, userMove.vec2y),
-            planck.Vec2(pos.x * worldScale, pos.y * worldScale),
-            true
-          );
-        }
-      }
-    );
-    // if (userMove.waiting === 'false') {
-    //   console.log(
-    //     'where is this logging to?:',
-    //     userMove.waiting,
-    //     userMove.vec2x,
-    //     userMove.vec2y
-    //   );
-    //   userMove.set({ waiting: true });
-    // }
-  }
+  //         // apply it
+  //         user.applyLinearImpulse(
+  //           planck.Vec2(userMove.vec2x, userMove.vec2y),
+  //           planck.Vec2(pos.x * worldScale, pos.y * worldScale),
+  //           true
+  //         );
+  //       }
+  //     }
+  //   );
+  // if (userMove.waiting === 'false') {
+  //   console.log(
+  //     'where is this logging to?:',
+  //     userMove.waiting,
+  //     userMove.vec2x,
+  //     userMove.vec2y
+  //   );
+  //   userMove.set({ waiting: true });
+  // }
+  // }
 
   puttUser2(userId, x, y) {
     const user = this.users[userId];

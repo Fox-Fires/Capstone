@@ -72,6 +72,12 @@ export const ballSpritePicker = (scene, x, y, sprite) => {
   const ball = scene.add.image(0, 0, sprite);
   ball.setInteractive();
   ball.setScrollFactor(0);
+  ball.on("pointerover", function () {
+    ball.setTint(0xffffff, 0xffffff, null, 0xffffff);
+  });
+  ball.on("pointerout", function () {
+    ball.clearTint();
+  });
   ball.on("pointerdown", function () {
     scene.me.setTexture(sprite);
   });
