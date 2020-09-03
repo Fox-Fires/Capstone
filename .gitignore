@@ -10,3 +10,6 @@ capstonegolf-67769-firebase-adminsdk-4la3k-eb85deef0e.json
 .firebase
 .firebase/hosting.cHVibGlj.cache
 firebase-debug.log
+ui-debug.log
+database-debug.log
+*.log
