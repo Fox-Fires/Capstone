@@ -37,7 +37,7 @@ export default class Root extends React.Component {
       <div>
         <h1>Tentative Golf Title</h1>
         <UserForm {...this.state.name} handleChange={this.handleChange} />
-        <GameIdForm {...this.state.gameId} handleChange={this.handleChange} />
+        <GameIdForm handleChange={this.handleChange} />
       </div>
     );
   }

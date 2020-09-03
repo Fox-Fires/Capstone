@@ -5,7 +5,7 @@ const GameIdForm = (props) => {
     <div className="gameId">
       <label htmlFor="gameId">Enter an Existing Game</label>
       <input
-        id="id"
+        name="gameId"
         type="text"
         value={props.gameId}
         onChange={props.handleChange}
