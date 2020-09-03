@@ -28,10 +28,12 @@ export default class Game extends Phaser.Scene {
     this.load.image('Gerg', './assets/Gerg.png');
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
     const apiRoute =
-      'http://localhost:5001/capstonegolf-67769/us-central1/api/game';
+      location.hostname === 'localhost'
+        ? 'http://localhost:5001/capstonegolf-67769/us-central1/api'
+        : 'https://us-central1-capstonegolf-67769.cloudfunctions.net/api';
 
     const { data } = axios
-      .post(apiRoute, {
+      .post(`${apiRoute}/game`, {
         userName: loadedData.name,
       })
       .then(({ data }) => {

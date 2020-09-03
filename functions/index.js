@@ -10,6 +10,7 @@ const express = require('express');
 const app = express();
 
 let game = undefined;
+const randomNum = Math.floor(Math.random() * 31);
 
 //Helps avoid cors mismatch between client and server.
 app.use(cors({ origin: true }));
@@ -30,6 +31,7 @@ app.post('/game', async (req, res) => {
 app.put('/:userId', (req, res) => {
   const userId = req.params.userId;
   const { x, y } = req.body;
+  console.log(`random number in put: ${randomNum}`);
 
   if (game) {
     game.puttUser2(userId, x, y);
@@ -39,24 +41,8 @@ app.put('/:userId', (req, res) => {
   }
 });
 
-// called when all users have completed game
-exports.gameOver = functions.database
-  .ref('/games/{gameId}/users/')
-  .onDelete((snapshot, context) => {
-    const { gameId } = context.params;
-    console.log(`Game ${gameId} ending in 30 seconds`);
-    setTimeout(game.endGame(), 30000);
-    return Promise.resolve('deleted');
-  });
+app.delete;
 
-// called when game is cleared form db
-exports.clearGame = functions.database
-  .ref('/games/{gameId}')
-  .onDelete((snap, context) => {
-    const { gameId } = context.params;
-    console.log(`Game ${gameId} ended`);
-    game = undefined;
-    return Promise.resolve('cleared');
-  });
+// called when all users have completed game
 
 exports.api = functions.https.onRequest(app);
