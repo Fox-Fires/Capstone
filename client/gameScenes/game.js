@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-import { database } from '../../Firebase/main';
-import axios from 'axios';
-=======
->>>>>>> 675df5f96b2b3b74d2d5008ad0b69396d3c68e4a
 
-import planck from "planck-js";
 import { database } from "../../Firebase/main";
 import axios from "axios";
 
