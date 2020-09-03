@@ -120,7 +120,8 @@ export const createHole = (scene, x, y, r) => {
   hole.fillCircle(0, 0, r);
   hole.x = x;
   hole.y = y;
-
+  // Add the flag on top
+  scene.add.image(x + 25, y - 25, "Flag");
   return hole;
 };
 

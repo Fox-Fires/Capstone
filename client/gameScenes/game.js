@@ -45,6 +45,8 @@ export default class Game extends Phaser.Scene {
     this.load.image("Earth", "./assets/Earth Kingdom.png");
     this.load.image("Fire", "./assets/Fire Nation.png");
     this.load.image("Air", "./assets/Air Nomads.png");
+    // Load Flag
+    this.load.image("Flag", "./assets/Flag.png");
     // Load grass background
     this.load.image("Grass5", "./assets/grassets/grass05.png");
 
