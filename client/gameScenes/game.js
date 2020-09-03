@@ -2,10 +2,7 @@ import planck from "planck-js";
 import { database } from "../../Firebase/main";
 import axios from "axios";
 
-
-import { createBall, createBox, createHole } from './helpers';
-
-
+import { createBall, createBox, createHole } from "./helpers";
 
 const userRadius = 15;
 
@@ -44,16 +41,20 @@ export default class Game extends Phaser.Scene {
         userName: loadedData.name,
       })
       .then(({ data }) => {
-        
         this.userId = data.userId;
         this.gameId = data.gameId;
+        //   return database
+        //     .ref(`games/${this.gameId}/users/${this.userId}`)
+        //     .on("value", (snapshot) => {
+        //       const myData = snapshot.val();
+        //       // this.me = createBall(this, myData.x, myData.y, 15);
+        //       this.me.x = myData.x;
+        //       this.me.y = myData.y;
+        //     });
         return database
-          .ref(`games/${this.gameId}/users/${this.userId}`)
-          .once("value", (snapshot) => {
-            const myData = snapshot.val();
-            // this.me = createBall(this, myData.x, myData.y, 15);
-            this.me.x = myData.x;
-            this.me.y = myData.y;
+          .ref(`games/${this.gameId}/users`)
+          .on("value", (snapshot) => {
+            this.updatePlayerPositions(snapshot.val());
           });
       })
       .then(() => {
@@ -62,15 +63,15 @@ export default class Game extends Phaser.Scene {
           .onDisconnect()
           .set({});
       })
-      .then(() => {
-        console.log(`getting ready to bind to game ${this.gameId}`);
-        // const f = updatePlayerPositions.bind(this);
-        return database
-          .ref(`games/${this.gameId}/users`)
-          .on("value", (snapshot) => {
-            this.updatePlayerPositions(snapshot.val());
-          });
-      })
+      // .then(() => {
+      //   console.log(`getting ready to bind to game ${this.gameId}`);
+      // const f = updatePlayerPositions.bind(this);
+      // return database
+      //   .ref(`games/${this.gameId}/users`)
+      //   .on("value", (snapshot) => {
+      //     this.updatePlayerPositions(snapshot.val());
+      //   });
+      // })
       .then(() => {
         console.log("Done loading");
       })
@@ -86,7 +87,7 @@ export default class Game extends Phaser.Scene {
       }
     });
     //Delete 'me' if no longer in database
-    if(this.userId && data && !data[this.userId]){
+    if (this.userId && data && !data[this.userId]) {
       this.me.destroy();
     }
 
@@ -128,7 +129,7 @@ export default class Game extends Phaser.Scene {
     createBox(this, 0, 560, 800, 40); // bottom
     createBox(this, 0, 0, 40, 600); // left
     createBox(this, 760, 0, 40, 600); // right
-    createHole(this,300,300,15);//The hole
+    createHole(this, 300, 300, 15); //The hole
 
     // load me
     this.me = createBall(this, 0, 0, userRadius);
