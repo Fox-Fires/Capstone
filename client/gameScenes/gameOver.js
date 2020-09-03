@@ -18,7 +18,7 @@ export default class GameOver extends Phaser.Scene {
   }
 
   create() {
-    // initalize empty text objext
+    // initalize empty text objects
     for (let i = 0; i < this.nWinners; i++) {
       this.winners.push(
         this.add
