@@ -1,4 +1,5 @@
 import React from 'react'
+import {Link} from 'react-router-dom'
 
 const UserForm = props => {
   return (
@@ -10,7 +11,9 @@ const UserForm = props => {
         value = {props.name}
         onChange = {props.handleChange}
       />
-      <button onClick={props.handlePlay}>Play</button>
+      <Link to='/play'>
+        <button>Play</button>
+      </Link>
     </div>
   )
 }

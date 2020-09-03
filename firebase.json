@@ -9,7 +9,7 @@
     "rewrites": [
       {
         "source": "**",
-        "destination": "/bundle.js"
+        "destination": "/index.html"
       }
     ]
   },
