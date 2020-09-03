@@ -56,7 +56,7 @@ export const createTextButt = (scene, x, y, text) => {
 };
 
 // Creates the white menu background
-export const createMenu = (scene, x, y, w, h) => {
+export const createMenuBackground = (scene, x, y, w, h) => {
   const color = new Phaser.Display.Color.ValueToColor("#FFFFFF");
 
   const box = scene.add.graphics();
@@ -86,6 +86,32 @@ export const ballSpritePicker = (scene, x, y, sprite) => {
 
   return ball;
 };
+
+// Toggle Menu on / off
+export const toggleMenu = (currScene) => {
+  if (currScene.menu === false) {
+    // Create the sprite menu
+    currScene.spriteMenu = createMenuBackground(currScene, 20, 45, 100, 255);
+    currScene.spriteWater = ballSpritePicker(currScene, 70, 70, "Water");
+    currScene.spriteEarth = ballSpritePicker(currScene, 70, 110, "Earth");
+    currScene.spriteFire = ballSpritePicker(currScene, 70, 150, "Fire");
+    currScene.spriteAir = ballSpritePicker(currScene, 70, 190, "Air");
+    currScene.spriteGerg = ballSpritePicker(currScene, 70, 230, "Gerg");
+    currScene.spriteGolf = ballSpritePicker(currScene, 70, 270, "golf");
+    currScene.menu = true;
+  } else {
+    // Remove the sprite menu
+    currScene.spriteMenu.destroy();
+    currScene.spriteWater.destroy();
+    currScene.spriteEarth.destroy();
+    currScene.spriteFire.destroy();
+    currScene.spriteAir.destroy();
+    currScene.spriteGerg.destroy();
+    currScene.spriteGolf.destroy();
+    currScene.menu = false;
+  }
+};
+
 export const createHole = (scene, x, y, r) => {
   const color = new Phaser.Display.Color();
   const hole = scene.add.graphics();

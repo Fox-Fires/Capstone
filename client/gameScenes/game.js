@@ -7,8 +7,7 @@ import {
   createHole,
   createBallSprite,
   createTextButt,
-  createMenu,
-  ballSpritePicker,
+  toggleMenu,
 } from "./helpers";
 
 const userRadius = 15;
@@ -163,6 +162,8 @@ export default class Game extends Phaser.Scene {
     createBox(this, 0, 560, 800, 40); // bottom
     createBox(this, 0, 0, 40, 600); // left
     createBox(this, 760, 0, 40, 600); // right
+
+    // Add hole visual
     createHole(this, 300, 300, 15); //The hole
 
     // load me
@@ -175,28 +176,9 @@ export default class Game extends Phaser.Scene {
     this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
     // On-Click listener
     this.switchSprite.on("pointerdown", function () {
-      if (currScene.menu === false) {
-        // Create the sprite menu
-        currScene.spriteMenu = createMenu(currScene, 20, 45, 100, 255);
-        currScene.spriteWater = ballSpritePicker(currScene, 70, 70, "Water");
-        currScene.spriteEarth = ballSpritePicker(currScene, 70, 110, "Earth");
-        currScene.spriteFire = ballSpritePicker(currScene, 70, 150, "Fire");
-        currScene.spriteAir = ballSpritePicker(currScene, 70, 190, "Air");
-        currScene.spriteGerg = ballSpritePicker(currScene, 70, 230, "Gerg");
-        currScene.spriteGolf = ballSpritePicker(currScene, 70, 270, "golf");
-        currScene.menu = true;
-      } else {
-        // Remove the sprite menu
-        currScene.spriteMenu.destroy();
-        currScene.spriteWater.destroy();
-        currScene.spriteEarth.destroy();
-        currScene.spriteFire.destroy();
-        currScene.spriteAir.destroy();
-        currScene.spriteGerg.destroy();
-        currScene.spriteGolf.destroy();
-        currScene.menu = false;
-      }
+      toggleMenu(currScene);
     });
+
     // add listener for new data
 
     //Pointer graphic
