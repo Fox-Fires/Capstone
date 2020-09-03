@@ -10,7 +10,6 @@ const express = require('express');
 const app = express();
 
 let game = undefined;
-const randomNum = Math.floor(Math.random() * 31);
 
 //Helps avoid cors mismatch between client and server.
 app.use(cors({ origin: true }));
@@ -31,7 +30,6 @@ app.post('/game', async (req, res) => {
 app.put('/:userId', (req, res) => {
   const userId = req.params.userId;
   const { x, y } = req.body;
-  console.log(`random number in put: ${randomNum}`);
 
   if (game) {
     game.puttUser2(userId, x, y);
