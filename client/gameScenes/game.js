@@ -143,8 +143,6 @@ export default class Game extends Phaser.Scene {
     // load me
     this.me = createBallSprite(this, 0, 0, "Gerg");
 
-    // this.game.add.group(null, "buttonsGroup", true);
-
     const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
     this.switchSprite = createTextButt(this, 20, 20, "Switch Balls");
     this.switchSprite.on("pointerdown", function () {
@@ -168,11 +166,6 @@ export default class Game extends Phaser.Scene {
         currScene.menu = false;
       }
     });
-    console.log(
-      "camera w and h",
-      this.cameras.main.width,
-      this.cameras.main.height
-    );
     // add listener for new data
 
     //Pointer graphic
@@ -184,11 +177,8 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
-        // console.log("down, pointer, ball", pointer, this.me.m_userData);
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
           this.clicked = true;
-          // console.log("me xy", this.me.m_userData.x, this.me.m_userData.y);
-          // console.log("point xy", pointer.x, pointer.y);
           this.line1 = new Phaser.Geom.Line(
             this.me.x,
             this.me.y,
@@ -202,7 +192,6 @@ export default class Game extends Phaser.Scene {
             this.graphics.fillRect(p.x - 2, p.y - 2, 4, 4);
           }
         }
-        // console.log(this.clicked);
       },
       this
     );
@@ -211,7 +200,6 @@ export default class Game extends Phaser.Scene {
       function (pointer) {
         if (this.clicked) {
           this.pointer = { x: pointer.x, y: pointer.y };
-          // console.log(" while clicked pointer", this.pointer);
         }
       },
       this
@@ -222,11 +210,6 @@ export default class Game extends Phaser.Scene {
         let difx = 400 - pointer.x;
         let dify = 300 - pointer.y;
         if (this.clicked) {
-          // this.me.applyLinearImpulse(
-          //   planck.Vec2(difx / 2, dify / 2),
-          //   planck.Vec2(this.me.x, this.me.y),
-          //   true
-          // );
           axios.put(
             `http://localhost:5001/capstonegolf-67769/us-central1/api/${this.userId}`,
             { x: difx / 2, y: dify / 2 }
@@ -244,61 +227,18 @@ export default class Game extends Phaser.Scene {
       if (this.cameras.main.zoom <= 0.6) {
         if (deltaY < 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
-          // switchSprite.x -= (deltaY / Math.abs(deltaY)) * (800 / 10);
-          // switchSprite.y -= (deltaY / Math.abs(deltaY)) * (600 / 10);
         }
       } else if (this.cameras.main.zoom >= 1.6) {
         if (deltaY > 0) {
           this.cameras.main.zoom -= deltaY * 0.001;
-          // switchSprite.x -= (deltaY / Math.abs(deltaY)) * (800 / 10);
-          // switchSprite.y -= (deltaY / Math.abs(deltaY)) * (600 / 10);
         }
       } else {
         this.cameras.main.zoom -= deltaY * 0.001;
-        // switchSprite.x -= (deltaY / Math.abs(deltaY)) * (800 / 10);
-        // switchSprite.y -= (deltaY / Math.abs(deltaY)) * (600 / 10);
       }
-      // x -200 y -100
-      // console.log("delta camera text", switchSprite);
-      // console.log("x, y", switchSprite.x, switchSprite.y);
-      // console.log("camera", this.cameras.main);
-      // console.log(
-      //   "camera worldview x y",
-      //   this.cameras.main.worldView.x,
-      //   this.cameras.main.worldView.y
-      // );
-      // console.log(
-      //   "neg diff",
-      //   -(-199.9 - this.cameras.main.worldView.x),
-      //   -(-99.9 - this.cameras.main.worldView.y)
-      // );
     });
   }
 
   update() {
-    // advance the simulation by 1/60 seconds
-    // this.world.step(1 / 60);
-
-    // crearForces  method should be added at the end on each step
-    // this.world.clearForces();
-
-    // iterate through all bodies
-    // for (let b = this.world.getBodyList(); b; b = b.getNext()) {
-    //   // get body position
-    //   let bodyPosition = b.getPosition();
-
-    //   // get body angle, in radians
-    //   let bodyAngle = b.getAngle();
-
-    //   // get body user data, the graphics object
-    //   let userData = b.getUserData();
-
-    //   // adjust graphic object position and rotation
-    //   userData.x = bodyPosition.x * this.worldScale;
-    //   userData.y = bodyPosition.y * this.worldScale;
-    //   userData.rotation = bodyAngle;
-    // }
-
     // this.switchSprite.x = 20 - (-199.9 - this.cameras.main.worldView.x);
     // this.switchSprite.y = 20 - (-99.9 - this.cameras.main.worldView.y);
     // this.switchSprite.setPosition(
