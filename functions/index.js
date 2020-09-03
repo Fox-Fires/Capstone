@@ -39,14 +39,24 @@ app.put('/:userId', (req, res) => {
   }
 });
 
-// listen for user deletions from db
-exports.deleteUser = functions.database
-  .ref('/games/{gameId}/users/{userId}')
+// called when all users have completed game
+exports.gameOver = functions.database
+  .ref('/games/{gameId}/users/')
   .onDelete((snapshot, context) => {
-    const { gameId, userId } = context.params;
-    console.log(`user ${userId} left game ${gameId}`);
-
+    const { gameId } = context.params;
+    console.log(`Game ${gameId} ending in 30 seconds`);
+    setTimeout(game.endGame(), 30000);
     return Promise.resolve('deleted');
+  });
+
+// called when game is cleared form db
+exports.clearGame = functions.database
+  .ref('/games/{gameId}')
+  .onDelete((snap, context) => {
+    const { gameId } = context.params;
+    console.log(`Game ${gameId} ended`);
+    game = undefined;
+    return Promise.resolve('cleared');
   });
 
 exports.api = functions.https.onRequest(app);
