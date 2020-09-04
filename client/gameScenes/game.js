@@ -8,6 +8,7 @@ import {
   createTextButt,
   toggleMenu,
   createBoxes,
+  spectateRandom,
 } from './helpers';
 
 const userRadius = 15;
@@ -31,6 +32,7 @@ export default class Game extends Phaser.Scene {
     this.updatePlayerPositions = this.updatePlayerPositions.bind(this);
     this.others = {};
     this.listener = null;
+    this.spectating = null;
 
     this.apiRoute =
       location.hostname === 'localhost'
@@ -51,7 +53,7 @@ export default class Game extends Phaser.Scene {
     // Load grass background
     this.load.image('Grass5', './assets/grassets/grass05.png');
     // Load Audio
-    this.load.audio('audio_swing','./assets/audio/golf-swing.mp3')
+    this.load.audio('audio_swing', './assets/audio/golf-swing.mp3');
 
     const loadedData = JSON.parse(localStorage.getItem('User-form'));
 
@@ -98,12 +100,19 @@ export default class Game extends Phaser.Scene {
       Object.keys(this.others).forEach((userId) => {
         if (!data[userId]) {
           this.others[userId].destroy();
+          const toDelete = this.others[userId];
           delete this.others[userId];
+
+          if (toDelete === this.spectating) {
+            this.spectating = spectateRandom(this);
+          }
         }
       });
       //Delete 'me' if no longer in database
       if (this.userId && data && !data[this.userId]) {
         this.me.destroy();
+        // this.spectating = true;
+        !this.spectating && (this.spectating = spectateRandom(this));
       }
 
       // update other players
@@ -144,7 +153,7 @@ export default class Game extends Phaser.Scene {
 
   create() {
     //Initialize sound
-    this.ballswing = this.sound.add("audio_swing")
+    this.ballswing = this.sound.add('audio_swing');
     // Current scene variable
     let currScene = this;
 
@@ -198,7 +207,7 @@ export default class Game extends Phaser.Scene {
         let dify = 300 - pointer.y;
 
         if (Math.hypot(difx, dify) <= 15 * this.cameras.main.zoom) {
-          this.clicked = true;
+          this.clicked = true && !this.spectating;
           this.line1 = new Phaser.Geom.Line(
             this.me.x,
             this.me.y,
@@ -234,8 +243,10 @@ export default class Game extends Phaser.Scene {
             x: difx / 2,
             y: dify / 2,
           });
+
+          // Thwack!
+          this.ballswing.play();
         }
-        this.ballswing.play();
         this.clicked = false;
       },
       this
@@ -280,12 +291,12 @@ export default class Game extends Phaser.Scene {
       }
     }
     // Set previous coordinates
-    if (
-      Math.round(this.me.x) != this.previousX ||
-      Math.round(this.me.y) != this.previousY
-    ) {
-      this.previousX = Math.round(this.me.x);
-      this.previousY = Math.round(this.me.y);
-    }
+    // if (
+    //   Math.round(this.me.x) != this.previousX ||
+    //   Math.round(this.me.y) != this.previousY
+    // ) {
+    //   this.previousX = Math.round(this.me.x);
+    //   this.previousY = Math.round(this.me.y);
+    // }
   }
 }
