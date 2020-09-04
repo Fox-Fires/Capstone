@@ -26,7 +26,7 @@ export default class PlayGame extends React.Component {
     const { handleQuit } = this.props;
     return (
       <div>
-        <h1>Tentative Golf Title</h1>
+        <h1>Mega Golf</h1>
         <Link to="/">
           <button onClick={handleQuit}>Leave Game</button>
         </Link>
