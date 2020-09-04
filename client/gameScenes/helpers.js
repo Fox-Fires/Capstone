@@ -144,3 +144,13 @@ export const createBoxes = (scene, barriers) => {
     createBox(scene, x, y, w, h);
   });
 };
+
+export const spectateRandom = (scene) => {
+  // grab random player in others to follow
+  const others = Object.values(scene.others);
+  const randIdx = Math.floor(Math.random() * others.length);
+  const other = others[randIdx];
+  scene.cameras.main.startFollow(other);
+
+  return other;
+};

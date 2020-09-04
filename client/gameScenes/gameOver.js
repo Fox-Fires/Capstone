@@ -1,5 +1,10 @@
 import { database } from '../../Firebase/main';
 
+// convenient lil func
+const round = (dec) => {
+  return dec.toFixed(2);
+};
+
 export default class GameOver extends Phaser.Scene {
   constructor() {
     super({
@@ -22,9 +27,9 @@ export default class GameOver extends Phaser.Scene {
     for (let i = 0; i < this.nWinners; i++) {
       this.winners.push(
         this.add
-          .text(20, 20 + i * 90, ``)
-          .setFontSize(80)
-          .setFontFamily('Trajan')
+          .text(20, 20 + i * 70, ``)
+          .setFontSize(60)
+          // .setFontFamily('Trajan')
           .setColor('black')
       );
     }
@@ -39,7 +44,7 @@ export default class GameOver extends Phaser.Scene {
     if (data) {
       Object.values(data)
         // sort player by position
-        .sort((pos1, pos2) => pos2.place - pos1.place)
+        .sort((pos1, pos2) => pos1.place - pos2.place)
 
         // only keep top n winners
         .slice(0, this.nWinners)
@@ -47,11 +52,11 @@ export default class GameOver extends Phaser.Scene {
         // put them on the leaderboard
         .forEach((winner, idx) => {
           const name = winner.username.slice(0, 4);
-          const padding = Array(8 - name.length)
+          const padding = Array(name.length <= 4 ? 8 - name.length : 4)
             .fill(' ')
             .join('');
           this.winners[idx].setText(
-            `${idx + 1}    ${name}${padding}${winner.time * 10 ** -3}`
+            `${idx + 1}    ${name}${padding}${round(winner.time * 10 ** -3)}`
           );
         });
     } else {
