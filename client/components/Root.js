@@ -19,7 +19,7 @@ export default class Root extends React.Component {
 
   componentDidUpdate() {
     const loadedData = JSON.parse(localStorage.getItem("User-form"));
-
+    console.log(loadedData);
     if (this.state !== loadedData) {
       //Save user-settings to local storage
       localStorage.setItem("User-form", JSON.stringify(this.state));

@@ -12,7 +12,8 @@ const {
   dt,
 } = require("./constants");
 const { db } = require("./admin");
-
+require("localstorage-polyfill");
+// const storage = JSON.parse(localStorage.getItem("User-form"));
 // convenient lil func
 const round = (dec) => {
   return parseFloat(dec.toFixed(2));
@@ -34,9 +35,14 @@ class Physics extends planck.World {
     // this.write = this.write.bind(this);
 
     // delete game instance if server unexpectedly disconnects
-    db.ref(`games/${this.gameId}`).onDisconnect().set({});
   }
-
+  // setGameNumber() {
+  //   if (localStorage.gameId) {
+  //     this.gameId = db.ref("games").push(`${localStorage.gameId}`);
+  //   } else {
+  //     this.gameId = db.ref("games").push().key;
+  //   }
+  // }
   startGame() {
     // update physics engine 60 time per second
     this.timer = setInterval(this.update, dt);
@@ -113,6 +119,7 @@ class Physics extends planck.World {
       prevAng: 0,
     });
 
+    console.log("🔑", localStorage.gameId);
     // add user to object for quick access
     this.users[id] = user;
     return user;

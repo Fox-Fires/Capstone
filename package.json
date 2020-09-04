@@ -64,6 +64,7 @@
     "eslint": "^7.7.0",
     "eslint-config-fullstack": "^6.0.0",
     "eslint-config-prettier": "^6.11.0",
+    "localstorage-polyfill": "^1.0.1",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
     "webpack": "^4.44.1",

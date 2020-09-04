@@ -55,6 +55,7 @@ export default class Game extends Phaser.Scene {
     const { data } = axios
       .post(apiRoute, {
         userName: loadedData.name,
+        gameId: loadedData.gameId,
       })
       .then(({ data }) => {
         this.userId = data.userId;
