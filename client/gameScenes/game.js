@@ -40,6 +40,7 @@ export default class Game extends Phaser.Scene {
     // try {
     // Load Ball Sprites
     this.load.image("Gerg", "./assets/Gerg.png");
+    this.load.image("Ben", "./assets/Ben's Head.png");
     this.load.image("golf", "./assets/golf_balls.png");
     this.load.image("Water", "./assets/Water Tribe.png");
     this.load.image("Earth", "./assets/Earth Kingdom.png");
@@ -183,7 +184,7 @@ export default class Game extends Phaser.Scene {
     createHole(this, 300, 300, 15); //The hole
 
     // load me
-    this.me = createBallSprite(this, 0, 0, "Gerg");
+    this.me = createBallSprite(this, 0, 0, "golf");
 
     // Array of Sprites
     // const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
