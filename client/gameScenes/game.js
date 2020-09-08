@@ -194,7 +194,7 @@ export default class Game extends Phaser.Scene {
     createHole(this, 900, 260, 15); //The hole
 
     // load me
-    this.me = createBallSprite(this, 0, 0, "Gerg");
+    this.me = createBallSprite(this, 0, 0, "Ben");
 
     // Array of Sprites
     // const spriteArr = ["Gerg", "Water", "Earth", "Fire", "Air", "golf"];
