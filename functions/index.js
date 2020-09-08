@@ -17,7 +17,7 @@ app.use(cors({ origin: true }));
 app.post("/game", async (req, res) => {
   if (!game) {
     game = new Physics();
-    game.loadLevel(barriers.level1);
+    game.loadLevel(barriers.vid);
     game.addHole(holeCoordinate);
     game.startGame();
   }
@@ -38,15 +38,5 @@ app.put("/:userId", (req, res) => {
     res.sendStatus(400);
   }
 });
-
-// listen for user deletions from db
-exports.deleteUser = functions.database
-  .ref("/games/{gameId}/users/{userId}")
-  .onDelete((snapshot, context) => {
-    const { gameId, userId } = context.params;
-    console.log(`user ${userId} left game ${gameId}`);
-
-    return Promise.resolve("deleted");
-  });
 
 exports.api = functions.https.onRequest(app);

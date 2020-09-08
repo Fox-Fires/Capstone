@@ -1,5 +1,5 @@
-import Phaser from "phaser";
-import { barriers } from "../../functions/constants";
+import Phaser from 'phaser';
+import { barriers } from '../../functions/constants';
 const userRadius = 15; // pixels
 
 export const makePlayers = (scene, data) => {
@@ -39,15 +39,15 @@ export const createTextButt = (scene, x, y, text) => {
   const button = scene.add
     .text(0, 0, text)
     .setFontSize(20)
-    .setFontFamily("Trajan")
-    .setColor("black")
+    .setFontFamily('Trajan')
+    .setColor('black')
     .setScrollFactor(0)
     .setInteractive();
-  button.on("pointerover", function () {
-    button.setColor("white");
+  button.on('pointerover', function () {
+    button.setColor('white');
   });
-  button.on("pointerout", function () {
-    button.setColor("black");
+  button.on('pointerout', function () {
+    button.setColor('black');
   });
 
   button.x = x;
@@ -58,7 +58,7 @@ export const createTextButt = (scene, x, y, text) => {
 
 // Creates the white menu background
 export const createMenuBackground = (scene, x, y, w, h) => {
-  const color = new Phaser.Display.Color.ValueToColor("#FFFFFF");
+  const color = new Phaser.Display.Color.ValueToColor('#FFFFFF');
 
   const box = scene.add.graphics();
   box.fillStyle(color.color, 1);
@@ -73,13 +73,13 @@ export const ballSpritePicker = (scene, x, y, sprite) => {
   const ball = scene.add.image(0, 0, sprite);
   ball.setInteractive();
   ball.setScrollFactor(0);
-  ball.on("pointerover", function () {
+  ball.on('pointerover', function () {
     ball.setTint(0xffffff, 0xffffff, null, 0xffffff);
   });
-  ball.on("pointerout", function () {
+  ball.on('pointerout', function () {
     ball.clearTint();
   });
-  ball.on("pointerdown", function () {
+  ball.on('pointerdown', function () {
     scene.me.setTexture(sprite);
   });
   ball.x = x;
@@ -93,12 +93,12 @@ export const toggleMenu = (currScene) => {
   if (currScene.menu === false) {
     // Create the sprite menu
     currScene.spriteMenu = createMenuBackground(currScene, 20, 45, 100, 255);
-    currScene.spriteWater = ballSpritePicker(currScene, 70, 70, "Water");
-    currScene.spriteEarth = ballSpritePicker(currScene, 70, 110, "Earth");
-    currScene.spriteFire = ballSpritePicker(currScene, 70, 150, "Fire");
-    currScene.spriteAir = ballSpritePicker(currScene, 70, 190, "Air");
-    currScene.spriteGerg = ballSpritePicker(currScene, 70, 230, "Gerg");
-    currScene.spriteGolf = ballSpritePicker(currScene, 70, 270, "golf");
+    currScene.spriteWater = ballSpritePicker(currScene, 70, 70, 'Water');
+    currScene.spriteEarth = ballSpritePicker(currScene, 70, 110, 'Earth');
+    currScene.spriteFire = ballSpritePicker(currScene, 70, 150, 'Fire');
+    currScene.spriteAir = ballSpritePicker(currScene, 70, 190, 'Air');
+    currScene.spriteGerg = ballSpritePicker(currScene, 70, 230, 'Gerg');
+    currScene.spriteGolf = ballSpritePicker(currScene, 70, 270, 'golf');
     currScene.menu = true;
   } else {
     // Remove the sprite menu
@@ -146,46 +146,12 @@ export const createBoxes = (scene, barriers) => {
   });
 };
 
-export const updatePlayerPositions = (data) => {
-  console.log("top of data listener");
-  console.log("what is this?", this);
+export const spectateRandom = (scene) => {
+  // grab random player in others to follow
+  const others = Object.values(scene.others);
+  const randIdx = Math.floor(Math.random() * others.length);
+  const other = others[randIdx];
+  scene.cameras.main.startFollow(other);
 
-  // remove players no longer in the game
-  Object.keys(this.others).forEach((userId) => {
-    if (!data[userId]) {
-      this.others[userId].destroy();
-      delete this.others[userId];
-    }
-  });
-
-  // update other players
-  Object.keys(data).forEach((userId) => {
-    // update existin player's position
-    if (this.others[userId] && userId !== this.userId) {
-      const incomingData = data[userId];
-      const player = this.others[userId];
-      player.x = incomingData.x;
-      player.y = incomingData.y;
-      player.rotation = incomingData.bodyAngle;
-
-      // add new players
-    } else if (!this.others[userId] && userId !== this.userId) {
-      const newPlayerData = data[userId];
-      const newPlayer = createBall(
-        this,
-        newPlayerData.x,
-        newPlayerData.y,
-        userRadius
-      );
-      this.others[userId] = newPlayer;
-
-      // update my position
-    } else if (userId === this.userId) {
-      const myData = data[userId];
-      console.log("here?");
-      this.me.x = myData.x;
-      this.me.y = myData.y;
-      this.me.rotation = myData.bodyAngle;
-    }
-  });
+  return other;
 };

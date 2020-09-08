@@ -65,10 +65,18 @@ const level1 = [
   { x: 780, y: 0, w: 40, h: 1200 }, // right
 ];
 
+const vid = [
+  { x: 600, y: 540, w: 1200, h: 40 }, // Bottom
+  { x: 600, y: 20, w: 1200, h: 40 }, // Top
+  { x: 20, y: 260, w: 40, h: 520 }, // Left
+  { x: 1180, y: 260, w: 40, h: 520 }, // Right
+];
+
 exports.barriers = {
   test,
   level1,
+  vid,
 };
 
 // in the form of [x,y]
-exports.holeCoordinate = [300, 300];
+exports.holeCoordinate = [900, 260];
