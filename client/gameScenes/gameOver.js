@@ -44,7 +44,7 @@ export default class GameOver extends Phaser.Scene {
     if (data) {
       Object.values(data)
         // sort player by position
-        .sort((pos1, pos2) => pos1.place - pos2.place)
+        .sort((pos1, pos2) => pos1.time - pos2.time)
 
         // only keep top n winners
         .slice(0, this.nWinners)

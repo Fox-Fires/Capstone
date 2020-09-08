@@ -33,11 +33,8 @@ export default class Root extends React.Component {
   render() {
     return (
       <div>
-        <h1>Tentative Golf Title</h1>
-          <UserForm
-            {...this.state}
-            handleChange={this.handleChange}
-          />
+        <h1>Mega Golf</h1>
+        <UserForm {...this.state} handleChange={this.handleChange} />
       </div>
     );
   }
